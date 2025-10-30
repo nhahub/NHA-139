@@ -16,18 +16,28 @@ A modern, full-featured listing directory application built with React, TypeScri
 ### Authentication & Authorization
 - **User Authentication**: Email/password authentication with Lovable Cloud
 - **Role-Based Access Control**: Three user roles (user, owner, admin)
-- **Protected Routes**: Secure access to owner and admin features
+- **Avatar Menu**: Clickable user avatar with dropdown showing profile, role badge, and navigation
+- **Persistent Sign Out**: Dedicated sign-out button in navbar for quick access
+- **Protected Routes**: Secure access to owner and admin features with role-based redirects
 - **Auto-confirm Email**: Streamlined signup process for testing
 
 ### Owner Features
 - **Listing Management**: Create, edit, and delete business listings
-- **Owner Dashboard**: View and manage all your listings
+- **Owner Dashboard**: View and manage all your listings at `/owner/my-listings`
 - **Rich Listing Forms**: Comprehensive forms with validation
 
+### User Features
+- **Profile Page**: Personal dashboard with favorites and visited history
+- **Favorites Management**: Save and organize favorite listings
+- **History Tracking**: View recently visited places with timestamps
+- **Quick Actions**: Unfavorite, view details, and remove from history
+
 ### Multilingual Support
-- **English & Arabic**: Full i18n support
-- **RTL Layout**: Automatic right-to-left layout for Arabic
+- **English & Arabic**: Full i18n support with Arabic as default language
+- **RTL Layout**: Automatic right-to-left layout for Arabic with mirrored navigation
+- **Language Switcher**: Globe icon in navbar to toggle between languages
 - **Language Persistence**: Language preference saved in localStorage
+- **No FOUC**: Direction set early to prevent flash of incorrect direction
 
 ### Theme Support
 - **Light/Dark Mode**: Toggle between themes
@@ -95,10 +105,18 @@ The app uses Lovable Cloud authentication with the following configuration:
 
 ### User Roles
 
-Three roles are available:
+Three roles are available with role-based dashboard routing:
 1. **user**: Default role for all new signups
+   - Dashboard → `/profile` (Favorites and History tabs)
+   - Can save favorites and track visited listings
 2. **owner**: Can create and manage listings (must be assigned manually)
+   - Dashboard → `/owner/my-listings`
+   - Full CRUD on own listings only
 3. **admin**: Full access to all features (must be assigned manually)
+   - Dashboard → `/dashboard`
+   - Full CRUD on Users, Listings, and Categories
+
+**Security Note**: Roles are stored in a separate `user_roles` table with proper RLS policies to prevent privilege escalation attacks.
 
 To assign roles, insert into `user_roles` table via backend interface.
 
@@ -108,9 +126,11 @@ To assign roles, insert into `user_roles` table via backend interface.
 src/
 ├── components/
 │   ├── layout/
-│   │   ├── Header.tsx              # Navigation with auth
+│   │   ├── Header.tsx              # Navigation with avatar menu
 │   │   └── Footer.tsx              # Footer component
 │   ├── ui/                         # shadcn/ui components
+│   ├── UserAvatar.tsx              # Avatar dropdown with profile
+│   ├── SignOutButton.tsx           # Standalone sign-out button
 │   ├── CategoryCard.tsx            # Category display card
 │   ├── ListingCard.tsx             # Listing display card
 │   ├── SearchFilters.tsx           # Filter panel component
@@ -119,22 +139,23 @@ src/
 │   ├── ThemeToggle.tsx             # Dark/light mode toggle
 │   └── LanguageSwitcher.tsx        # Language switcher
 ├── contexts/
-│   └── AuthContext.tsx             # Authentication context
+│   └── AuthContext.tsx             # Authentication context with roles
 ├── pages/
 │   ├── Home.tsx                    # Landing page
 │   ├── Listings.tsx                # Listings with filters
 │   ├── ListingDetail.tsx           # Listing details
 │   ├── Contact.tsx                 # Contact form
-│   ├── Dashboard.tsx               # Admin dashboard
+│   ├── Profile.tsx                 # User profile with favorites/history
+│   ├── Favorites.tsx               # Favorites management
+│   ├── Dashboard.tsx               # Admin dashboard (admin only)
 │   ├── NotFound.tsx                # 404 page
 │   ├── auth/
 │   │   ├── SignIn.tsx              # Sign in page
 │   │   ├── SignUp.tsx              # Sign up page
 │   │   └── ForgotPassword.tsx      # Password reset
 │   └── owner/
-│       ├── MyListings.tsx          # Owner's listings
-│       ├── AddListing.tsx          # Create listing
-│       └── EditListing.tsx         # Edit listing
+│       ├── MyListings.tsx          # Owner's listings dashboard
+│       └── AddListing.tsx          # Create listing
 ├── integrations/
 │   └── supabase/
 │       ├── client.ts               # Supabase client
