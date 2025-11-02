@@ -10,6 +10,6 @@ app.use(morgan("dev"));
 
 // Routes
 const placesRoutes = require("./routes/placeRoutes");
-app.use("/api/places", placesRoutes);
+app.use("/api/v1/places", placesRoutes);
 
 module.exports = app;
