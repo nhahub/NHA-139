@@ -1,8 +1,51 @@
 // controllers/userController.js
 const mongoose = require("mongoose");
 const User = require("../models/User");
-const Place = require("../models/placeModel"); // keep if you need Place directly
-const Listing = require("../models/listingModel"); // make sure this path matches your project
+const Place = require("../models/placeModel"); 
+const Listing = require("../models/listingModel"); 
+
+// Admin actions
+exports.addUser = async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    const user = await User.create({ name, email, password, role });
+    res.status(201).json({ message: 'User created successfully', user });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.updateUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User updated', user });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ message: 'User deleted' });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json({ users });
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+
+// User actions
 
 // helper to return populated user doc
 const getPopulatedUser = async (userId) => {

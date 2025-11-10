@@ -21,6 +21,7 @@ const listingSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    needsReview: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

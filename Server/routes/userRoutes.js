@@ -1,9 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
-const { protect } = require("../middlewares/authMiddleware");
+const { protect,restrictTo } = require("../middlewares/authMiddleware");
 
 // Protected routes
+router.post('/', protect, restrictTo('admin'), userController.addUser);
+router.put('/:id', protect, restrictTo('admin'), userController.updateUser);
+router.delete('/:id', protect, restrictTo('admin'), userController.deleteUser);
+
 router.get("/me", protect, userController.getMyProfile);
 router.get("/favorites", protect, userController.getFavorites);
 
