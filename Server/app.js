@@ -10,6 +10,13 @@ app.use(morgan("dev"));
 
 // Routes
 const placesRoutes = require("./routes/placeRoutes");
+const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
+const listing = require("./routes/listingRoute");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/v1/places", placesRoutes);
+app.use("/api/listing", listing);
 
 module.exports = app;
