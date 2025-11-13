@@ -38,12 +38,18 @@ const Listings: React.FC = () => {
  const [isFavorite, setIsFavorite] = useState<Record<string, boolean>>({});
   const [sortOption, setSortOption] = useState<string>("default");
   const [viewType, setViewType] = useState<string>("grid");
+  const [visibleCount, setVisibleCount] = useState(20);
+  const [originalRestaurants, setOriginalRestaurants] = useState<Restaurant[]>([]);
 
 
   useEffect(() => {
     axios
       .get("http://127.0.0.1:5000/api/v1/places")
-      .then((res) => setRestaurants(res.data.data.places))
+      .then((res) => {
+      setRestaurants(res.data.data.places);
+      setOriginalRestaurants(res.data.data.places); 
+    })
+      
       .catch((err) => console.log("Error:", err))
   }, [])
 
@@ -88,7 +94,7 @@ const handleSort = async (option: string) => {
       setRestaurants(res.data.data.places);
     } 
     else if (option === "highRating") {
-      const sorted = [...restaurants].sort(
+      const sorted = [...originalRestaurants].sort(
         (a, b) => (b.ratingsAverage ?? 0) - (a.ratingsAverage ?? 0)
       );
       setRestaurants(sorted);
@@ -102,6 +108,10 @@ const handleSort = async (option: string) => {
     alert("Error while sorting");
   }
 };
+//load
+const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 8);
+  };
 
 
  
@@ -175,7 +185,7 @@ const handleSort = async (option: string) => {
         }
       >
 
-        {restaurants.map((item) => (
+        {restaurants.slice(0, visibleCount).map((item)  => (
           <Link key={item._id} to={`/Listing/${item._id}`}>
             <Card className="group overflow-hidden transition-all hover:shadow-lg border-none p-0 pb-5">
               <CardContent className="p-0">
@@ -252,8 +262,19 @@ const handleSort = async (option: string) => {
           </Link>
 
         ))}
-       
+
+
       </div>
+      {visibleCount < restaurants.length && (
+        <div className="flex justify-center mt-8 mb-10">
+          <button
+            onClick={handleLoadMore}
+            className="px-5 py-2 bg-[#ef4343] text-white rounded-lg hover:bg-[#ff7e7e] transition"
+          >
+            Load More
+          </button>
+        </div>
+      )}
  <Footer/>
     </>
   )
