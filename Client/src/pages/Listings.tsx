@@ -228,14 +228,14 @@ const handleSort = async (option: string) => {
                       <span className="font-semibold">{item.ratingsAverage}</span>
                     </div>
                     <div className="text-lg font-bold text-gray-500 ">
-                      Price Level ↑:
+                      Price Level {"\u2191"}:
                       <span className='text-[#ef4343]'>{item.priceLevel}</span>
                     </div>
                   </div>
 
                   {item.phone ? (
                     <div className="mt-3 flex items-center space-x-2 text-sm  text-gray-500">
-                      <Phone className="h-3 w-3" />
+                      <Phone className="h-3 w-3 text-[#ef4343]" />
                       <span>{item.phone}</span>
                     </div>
                   ) : (
