@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react'
 import {
   Card,
@@ -12,7 +11,7 @@ import {
 import { Link } from "react-router-dom"
 import img from '../assets/Cardimg.png'
 import axios from "axios";
-import { Star, MapPin, Phone, Heart } from "lucide-react";
+import { Star, MapPin, Phone, Heart,Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -40,17 +39,25 @@ const Listings: React.FC = () => {
   const [viewType, setViewType] = useState<string>("grid");
   const [visibleCount, setVisibleCount] = useState(20);
   const [originalRestaurants, setOriginalRestaurants] = useState<Restaurant[]>([]);
-
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setLoading(true);
+    setError(null);
     axios
       .get("http://127.0.0.1:5000/api/v1/places")
       .then((res) => {
       setRestaurants(res.data.data.places);
       setOriginalRestaurants(res.data.data.places); 
+        setLoading(false);
     })
       
-      .catch((err) => console.log("Error:", err))
+      .catch((err) =>  {
+        console.error("Error:", err);
+        setError("Failed to load restaurants. Please try again later.");
+        setLoading(false);
+      })
   }, [])
 
  const togglefavorite = (id: string) => {
@@ -82,6 +89,8 @@ const getLocation = (): Promise<{ lat: number; lng: number }> => {
 
 const handleSort = async (option: string) => {
   setSortOption(option);
+   setLoading(true);
+    setError(null);
 
   try {
     if (option === "nearest") {
@@ -103,9 +112,11 @@ const handleSort = async (option: string) => {
       const res = await axios.get("http://127.0.0.1:5000/api/v1/places");
       setRestaurants(res.data.data.places);
     }
+    setLoading(false);
   } catch (err) {
     console.error("Error while sorting:", err);
-    alert("Error while sorting");
+    setError("Error while sorting. Please try again.");
+    setLoading(false);
   }
 };
 //load
@@ -118,20 +129,21 @@ const handleLoadMore = () => {
   return (
     <>
  <Header/>
-      <div className="flex flex-col w-full h-[132px] bg-gray-100 ">
+      <div className="flex flex-col w-full h-[132px] bg-gray-100 dark:bg-background ">
        
         <div className="container mx-auto">
-          <h2 className='text-black font-bold text-4xl mt-5 ml-20'>All Listings</h2>
-          <span className='text-gray-400  text-2xl mt-2 ml-[60px]'>Showing All results</span>
+          <h2 className='text-black font-bold text-4xl mt-5 ml-20 dark:text-white'>All Listings</h2>
+          <span className='text-gray-400 text-2xl mt-2 ml-[60px]'>Showing All results</span>
         </div>
       </div>
 
       <div className="flex items-center justify-center gap-6 mt-7">
         {/* Dropdown */}
         <select
-          className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ef4343]"
+          className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ef4343] dark:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
           value={sortOption}
           onChange={(e) => handleSort(e.target.value)}
+          disabled={loading}
         >
           <option value="default">Default</option>
           <option value="nearest">Nearest</option>
@@ -143,7 +155,8 @@ const handleLoadMore = () => {
           {/* Grid View Button */}
           <button
             onClick={() => setViewType("grid")}
-            className={`p-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer
+            disabled={loading}
+            className={`p-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
       ${viewType === "grid"
                 ? "bg-[#ef4343] text-white"
                 : "bg-white text-gray-700 border border-gray-300 hover:bg-[#ffe1e1] hover:text-[#ef4343]"
@@ -160,7 +173,8 @@ const handleLoadMore = () => {
           {/* List View Button */}
           <button
             onClick={() => setViewType("list")}
-            className={`p-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer
+            disabled={loading}
+            className={`p-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
       ${viewType === "list"
                 ? "bg-[#ef4343] text-white"
                 : "bg-white text-gray-700 border border-gray-300 hover:bg-[#ffe1e1] hover:text-[#ef4343]"
@@ -176,7 +190,22 @@ const handleLoadMore = () => {
         </div>
 
       </div>
+      {/* Error Message */}
+      {error && (
+        <div className="mx-auto max-w-2xl mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-600 text-center">{error}</p>
+        </div>
+      )}
 
+      {/* Loading Spinner */}
+      {loading ? (
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 text-[#ef4343] animate-spin" />
+            <p className="text-gray-600 dark:text-gray-400">Loading restaurants...</p>
+          </div>
+        </div>
+      ) : (
       <div
         className={
           viewType === "grid"
@@ -187,7 +216,7 @@ const handleLoadMore = () => {
 
         {restaurants.slice(0, visibleCount).map((item)  => (
           <Link key={item._id} to={`/Listing/${item._id}`}>
-            <Card className="group overflow-hidden transition-all hover:shadow-lg border-none p-0 pb-5">
+            <Card className="group relative overflow-visible transition-all hover:shadow-lg h-full bg-card text-foreground border border-border p-0 pb-5">
               <CardContent className="p-0">
                 <div className="relative aspect-4/3 overflow-hidden">
                   <img
@@ -220,13 +249,12 @@ const handleLoadMore = () => {
                     <div className="hover:text-[#ef4343]">
                       {item.name}
                     </div>
-
-                    <span className="inline-block border border-gray-400 text-gray-700 text-sm font-medium px-1  rounded-full">
-                      {item.category && item.category.length > 0 ? item.category[0] : "Not Found"}
-                    </span>
+                    <span className="relative group inline-block max-w-[80px] truncate border border-gray-400 text-gray-700 text-sm font-medium px-1 rounded-full dark:text-white">
+                   {item.category && item.category.length > 0 ? item.category[0] : "Not Found"}
+                   </span>
                   </div>
                 </CardTitle>
-                <CardDescription className="text-gray-500">{item.city}</CardDescription>
+                <CardDescription className="text-muted-foreground dark:text-white">{item.city}</CardDescription>
               </CardHeader>
 
               <CardFooter>
@@ -265,7 +293,8 @@ const handleLoadMore = () => {
 
 
       </div>
-      {visibleCount < restaurants.length && (
+      )}
+      {!loading && visibleCount < restaurants.length && (
         <div className="flex justify-center mt-8 mb-10">
           <button
             onClick={handleLoadMore}
