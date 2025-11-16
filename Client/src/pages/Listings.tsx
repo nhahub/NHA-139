@@ -9,10 +9,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import img from "../assets/Cardimg.png";
 import axios from "axios";
-import { Star, MapPin, Phone, Heart, Loader2 } from "lucide-react";
+import { Star, MapPin, Phone, Heart, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -37,6 +37,9 @@ interface Restaurant {
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
 
 const Listings: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isFavorite, setIsFavorite] = useState<Record<string, boolean>>({});
   const [sortOption, setSortOption] = useState<string>("default");
@@ -48,18 +51,61 @@ const Listings: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { user, token } = useAuth();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  // Get filters from URL
+  const cityFilter = searchParams.get("city");
+  const priceLevelFilter = searchParams.get("priceLevel");
 
   useEffect(() => {
+    fetchRestaurants();
+  }, [cityFilter, priceLevelFilter]); // Refetch when filters change
+
+  const fetchRestaurants = () => {
     setLoading(true);
     setError(null);
+
+    // Build URL with filters
+    let url = "http://127.0.0.1:5000/api/v1/places";
+    const params = new URLSearchParams();
+
+    if (cityFilter) params.append("city", cityFilter);
+    if (priceLevelFilter) params.append("priceLevel", priceLevelFilter);
+
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    console.log("Fetching URL:", url); // Debug log
+    console.log("City Filter:", cityFilter); // Debug log
+    console.log("Price Level Filter:", priceLevelFilter); // Debug log
+
     axios
-      .get("http://127.0.0.1:5000/api/v1/places")
+      .get(url)
       .then((res) => {
-        setRestaurants(res.data.data.places);
-        setOriginalRestaurants(res.data.data.places);
+        console.log("API Response:", res.data); // Debug log
+        console.log("Places received:", res.data.data.places.length); // Debug log
+
+        let places = res.data.data.places;
+
+        // Client-side filtering as backup (in case API doesn't filter properly)
+        if (cityFilter) {
+          places = places.filter(
+            (place: Restaurant) =>
+              place.city &&
+              place.city.toLowerCase() === cityFilter.toLowerCase()
+          );
+          console.log("After city filter:", places.length); // Debug log
+        }
+
+        if (priceLevelFilter) {
+          const priceLevel = parseInt(priceLevelFilter);
+          places = places.filter(
+            (place: Restaurant) => place.priceLevel === priceLevel
+          );
+          console.log("After price filter:", places.length); // Debug log
+        }
+
+        setRestaurants(places);
+        setOriginalRestaurants(places);
         setLoading(false);
       })
       .catch((err) => {
@@ -67,118 +113,13 @@ const Listings: React.FC = () => {
         setError("Failed to load restaurants. Please try again later.");
         setLoading(false);
       });
-  }, []);
-
-  useEffect(() => {
-    if (user && user.favorites) {
-      const favMap = user.favorites.reduce((acc, fav) => {
-        acc[fav._id] = true;
-        return acc;
-      }, {} as Record<string, boolean>);
-
-      setIsFavorite(favMap);
-    } else {
-      setIsFavorite({});
-    }
-  }, [user]);
-
-  const toggleFavoriteMutation = useMutation({
-    mutationFn: async ({
-      placeId,
-      isCurrentlyFavorite,
-    }: {
-      placeId: string;
-      isCurrentlyFavorite: boolean;
-    }) => {
-      if (!token) throw new Error("Please log in to add favorites.");
-
-      const url = `${USERS_API_URL}/favorites${
-        isCurrentlyFavorite ? `/${placeId}` : ""
-      }`;
-      const method = isCurrentlyFavorite ? "DELETE" : "POST";
-
-      const options: RequestInit = {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      };
-
-      if (method === "POST") {
-        options.body = JSON.stringify({ placeId });
-      }
-
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Failed to update favorite");
-      }
-    },
-    onSuccess: (data, variables) => {
-      const { placeId, isCurrentlyFavorite } = variables;
-
-      setIsFavorite((prev) => ({
-        ...prev,
-        [placeId]: !isCurrentlyFavorite,
-      }));
-
-      queryClient.invalidateQueries({ queryKey: ["favorites"] });
-      queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
-
-      toast({
-        title: "Success",
-        description: isCurrentlyFavorite
-          ? "Removed from favorites"
-          : "Added to favorites",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  const toggleFavorite = (id: string) => {
-    if (!token) {
-      toast({
-        title: "Login Required",
-        description: "Please log in to manage your favorites.",
-        variant: "destructive",
-      });
-      return;
-    }
-    toggleFavoriteMutation.mutate({
-      placeId: id,
-      isCurrentlyFavorite: !!isFavorite[id],
-    });
   };
 
-  const addHistoryMutation = useMutation({
-    mutationFn: async (placeId: string) => {
-      if (!token) return;
-
-      await fetch(`${USERS_API_URL}/history`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ placeId }),
-      });
-    },
-    onError: (error: any) => {
-      console.error("Failed to add to history:", error);
-    },
-  });
-
-  const handleListingClick = (placeId: string) => {
-    if (token) {
-      addHistoryMutation.mutate(placeId);
-    }
+  const togglefavorite = (id: string) => {
+    setIsFavorite((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   const getLocation = (): Promise<{ lat: number; lng: number }> => {
@@ -214,13 +155,13 @@ const Listings: React.FC = () => {
 
         setRestaurants(res.data.data.places);
       } else if (option === "highRating") {
-        const res = await axios.get(
-          `http://127.0.0.1:5000/api/v1/places/search?sortBy=rating`
+        const sorted = [...originalRestaurants].sort(
+          (a, b) => (b.ratingsAverage ?? 0) - (a.ratingsAverage ?? 0)
         );
-        setRestaurants(res.data.data.places);
+        setRestaurants(sorted);
       } else {
-        const res = await axios.get("http://127.0.0.1:5000/api/v1/places");
-        setRestaurants(res.data.data.places);
+        // Reset to filtered results
+        fetchRestaurants();
       }
       setLoading(false);
     } catch (err) {
@@ -234,6 +175,15 @@ const Listings: React.FC = () => {
     setVisibleCount((prev) => prev + 8);
   };
 
+  // Clear all filters
+  const handleClearFilters = () => {
+    navigate("/listings");
+    setVisibleCount(20);
+  };
+
+  // Check if any filters are active
+  const hasActiveFilters = cityFilter || priceLevelFilter;
+
   return (
     <>
       <Header />
@@ -242,13 +192,43 @@ const Listings: React.FC = () => {
           <h2 className="text-black font-bold text-4xl mt-5 ml-20 dark:text-white">
             All Listings
           </h2>
-          <span className="text-gray-400 text-2xl mt-2 ml-[60px]">
-            Showing All results
-          </span>
+          <div className="flex items-center gap-2 ml-[60px]">
+            <span className="text-gray-400 text-2xl mt-2">
+              {hasActiveFilters
+                ? "Showing Filtered Results"
+                : "Showing All results"}
+            </span>
+            {hasActiveFilters && (
+              <div className="flex items-center gap-2 mt-2">
+                {cityFilter && (
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                    {cityFilter}
+                  </span>
+                )}
+                {priceLevelFilter && (
+                  <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                    {"$".repeat(parseInt(priceLevelFilter))}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-6 mt-7">
+      <div className="flex items-center justify-center gap-6 mt-7 flex-wrap">
+        {/* Clear Filters Button */}
+        {hasActiveFilters && (
+          <button
+            onClick={handleClearFilters}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+          >
+            <X className="w-4 h-4" />
+            Clear Filters
+          </button>
+        )}
+
+        {/* Dropdown */}
         <select
           className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ef4343] dark:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
           value={sortOption}
@@ -329,6 +309,43 @@ const Listings: React.FC = () => {
             </p>
           </div>
         </div>
+      ) : restaurants.length === 0 ? (
+        // No Results Found
+        <div className="flex flex-col items-center justify-center min-h-[400px] px-4">
+          <div className="text-center max-w-md">
+            <div className="mb-4">
+              <svg
+                className="mx-auto h-16 w-16 text-gray-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              No Places Found
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              {hasActiveFilters
+                ? "We couldn't find any places matching your filters. Try adjusting your search criteria."
+                : "No places are currently available."}
+            </p>
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="px-6 py-3 bg-[#ef4343] text-white rounded-lg hover:bg-[#ff7e7e] transition font-semibold"
+              >
+                Clear All Filters
+              </button>
+            )}
+          </div>
+        </div>
       ) : (
         <div
           className={
@@ -338,11 +355,7 @@ const Listings: React.FC = () => {
           }
         >
           {restaurants.slice(0, visibleCount).map((item) => (
-            <Link
-              key={item._id}
-              to={`/Listing/${item._id}`}
-              onClick={() => handleListingClick(item._id)}
-            >
+            <Link key={item._id} to={`/Listing/${item._id}`}>
               <Card className="group relative overflow-visible transition-all hover:shadow-lg h-full bg-card text-foreground border border-border p-0 pb-5">
                 <CardContent className="p-0">
                   <div className="relative aspect-4/3 overflow-hidden">
@@ -354,16 +367,15 @@ const Listings: React.FC = () => {
                     <Button
                       size="icon"
                       variant="secondary"
-                      className="absolute bottom-3 right-3 h-9 w-9 rounded-full opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-50"
+                      className="absolute bottom-3 right-3 h-9 w-9 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
                       onClick={(e) => {
                         e.preventDefault();
-                        toggleFavorite(item._id);
+                        togglefavorite(item._id);
                       }}
-                      disabled={toggleFavoriteMutation.isPending}
                     >
                       <Heart
                         className={`h-5 w-5 transition-colors ${
-                          isFavorite[item._id] //
+                          isFavorite[item._id]
                             ? "fill-red-600 text-red-600"
                             : "fill-none text-gray-100"
                         }`}
@@ -434,7 +446,7 @@ const Listings: React.FC = () => {
             onClick={handleLoadMore}
             className="px-5 py-2 bg-[#ef4343] text-white rounded-lg hover:bg-[#ff7e7e] transition"
           >
-            Load More
+            Load More ({restaurants.length - visibleCount} remaining)
           </button>
         </div>
       )}
