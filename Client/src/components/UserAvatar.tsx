@@ -91,13 +91,7 @@ export function UserAvatar({ user }: UserAvatarProps) {
           <UserIcon className="mr-2 h-4 w-4" />
           {t("nav.profile")}
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => navigate("/favorites")}
-          className="cursor-pointer"
-        >
-          <Heart className="mr-2 h-4 w-4" />
-          {t("nav.favorites")}
-        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onClick={handleSignOut}

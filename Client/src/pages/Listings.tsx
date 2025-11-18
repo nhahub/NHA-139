@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React, { useState, useEffect } from "react";
@@ -19,7 +20,7 @@ import { Footer } from "@/components/layout/Footer";
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface Restaurant {
   _id: string;
@@ -35,91 +36,181 @@ interface Restaurant {
 }
 
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
+const PLACES_API_URL = "http://127.0.0.1:5000/api/v1/places";
 
 const Listings: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
+  const { user, token } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isFavorite, setIsFavorite] = useState<Record<string, boolean>>({});
   const [sortOption, setSortOption] = useState<string>("default");
   const [viewType, setViewType] = useState<string>("grid");
   const [visibleCount, setVisibleCount] = useState(20);
-  const [originalRestaurants, setOriginalRestaurants] = useState<Restaurant[]>(
-    []
-  );
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // Get filters from URL
   const cityFilter = searchParams.get("city");
   const priceLevelFilter = searchParams.get("priceLevel");
 
-  useEffect(() => {
-    fetchRestaurants();
-  }, [cityFilter, priceLevelFilter]); // Refetch when filters change
+  const { isLoading, error } = useQuery({
+    queryKey: ["listings", cityFilter, priceLevelFilter, sortOption],
+    queryFn: async () => {
+      if (!token) {
+        return { data: { places: [] } };
+      }
 
-  const fetchRestaurants = () => {
-    setLoading(true);
-    setError(null);
+      const params = new URLSearchParams();
 
-    // Build URL with filters
-    let url = "http://127.0.0.1:5000/api/v1/places";
-    const params = new URLSearchParams();
+      if (cityFilter) params.append("city", cityFilter);
+      if (priceLevelFilter) params.append("priceLevel", priceLevelFilter);
 
-    if (cityFilter) params.append("city", cityFilter);
-    if (priceLevelFilter) params.append("priceLevel", priceLevelFilter);
-
-    if (params.toString()) {
-      url += `?${params.toString()}`;
-    }
-
-    console.log("Fetching URL:", url); // Debug log
-    console.log("City Filter:", cityFilter); // Debug log
-    console.log("Price Level Filter:", priceLevelFilter); // Debug log
-
-    axios
-      .get(url)
-      .then((res) => {
-        console.log("API Response:", res.data); // Debug log
-        console.log("Places received:", res.data.data.places.length); // Debug log
-
-        let places = res.data.data.places;
-
-        // Client-side filtering as backup (in case API doesn't filter properly)
-        if (cityFilter) {
-          places = places.filter(
-            (place: Restaurant) =>
-              place.city &&
-              place.city.toLowerCase() === cityFilter.toLowerCase()
-          );
-          console.log("After city filter:", places.length); // Debug log
+      if (sortOption === "nearest") {
+        try {
+          const { lat, lng } = await getLocation();
+          params.append("sortBy", "radius");
+          params.append("lat", lat.toString());
+          params.append("lng", lng.toString());
+        } catch (err) {
+          console.error("Could not get location for sorting", err);
+          toast({
+            title: "Error",
+            description: "Could not get your location for sorting.",
+            variant: "destructive",
+          });
         }
+      } else if (sortOption === "highRating") {
+        params.append("sortBy", "rating");
+      }
 
-        if (priceLevelFilter) {
-          const priceLevel = parseInt(priceLevelFilter);
-          places = places.filter(
-            (place: Restaurant) => place.priceLevel === priceLevel
-          );
-          console.log("After price filter:", places.length); // Debug log
-        }
+      let url = `${PLACES_API_URL}/search`;
+      if (params.toString()) {
+        url += `?${params.toString()}`;
+      }
 
-        setRestaurants(places);
-        setOriginalRestaurants(places);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error:", err);
-        setError("Failed to load restaurants. Please try again later.");
-        setLoading(false);
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
+
+      setRestaurants(response.data.data.places);
+      return response.data;
+    },
+    enabled: !!token,
+  });
+
+  useEffect(() => {
+    if (user && user.favorites) {
+      const favMap = user.favorites.reduce((acc, fav) => {
+        acc[fav._id] = true;
+        return acc;
+      }, {} as Record<string, boolean>);
+      setIsFavorite(favMap);
+    } else {
+      setIsFavorite({});
+    }
+  }, [user]);
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({
+      placeId,
+      isCurrentlyFavorite,
+    }: {
+      placeId: string;
+      isCurrentlyFavorite: boolean;
+    }) => {
+      if (!token) throw new Error("Please log in to add favorites.");
+
+      const url = `${USERS_API_URL}/favorites${
+        isCurrentlyFavorite ? `/${placeId}` : ""
+      }`;
+      const method = isCurrentlyFavorite ? "DELETE" : "POST";
+
+      const options: RequestInit = {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      if (method === "POST") {
+        options.body = JSON.stringify({ placeId });
+      }
+
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.message || "Failed to update favorite");
+      }
+    },
+    onSuccess: (data, variables) => {
+      const { placeId, isCurrentlyFavorite } = variables;
+
+      setIsFavorite((prev) => ({ ...prev, [placeId]: !isCurrentlyFavorite }));
+
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
+      queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+
+      toast({
+        title: "Success",
+        description: isCurrentlyFavorite
+          ? "Removed from favorites"
+          : "Added to favorites",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const toggleFavorite = (id: string) => {
+    if (!token) {
+      toast({
+        title: "Login Required",
+        description: "Please log in to manage your favorites.",
+        variant: "destructive",
+      });
+      return;
+    }
+    toggleFavoriteMutation.mutate({
+      placeId: id,
+      isCurrentlyFavorite: !!isFavorite[id],
+    });
   };
 
-  const togglefavorite = (id: string) => {
-    setIsFavorite((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
+  const addHistoryMutation = useMutation({
+    mutationFn: async (placeId: string) => {
+      if (!token) return;
+      await fetch(`${USERS_API_URL}/history`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ placeId }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: (error: any) => {
+      console.error("Failed to add to history:", error);
+    },
+  });
+
+  const handleListingClick = (placeId: string) => {
+    if (token) {
+      addHistoryMutation.mutate(placeId);
+    }
   };
 
   const getLocation = (): Promise<{ lat: number; lng: number }> => {
@@ -140,59 +231,31 @@ const Listings: React.FC = () => {
     });
   };
 
-  const handleSort = async (option: string) => {
+  const handleSort = (option: string) => {
     setSortOption(option);
-    setLoading(true);
-    setError(null);
-
-    try {
-      if (option === "nearest") {
-        const { lat, lng } = await getLocation();
-
-        const res = await axios.get(
-          `http://127.0.0.1:5000/api/v1/places/search?sortBy=radius&lat=${lat}&lng=${lng}`
-        );
-
-        setRestaurants(res.data.data.places);
-      } else if (option === "highRating") {
-        const sorted = [...originalRestaurants].sort(
-          (a, b) => (b.ratingsAverage ?? 0) - (a.ratingsAverage ?? 0)
-        );
-        setRestaurants(sorted);
-      } else {
-        // Reset to filtered results
-        fetchRestaurants();
-      }
-      setLoading(false);
-    } catch (err) {
-      console.error("Error while sorting:", err);
-      setError("Error while sorting. Please try again.");
-      setLoading(false);
-    }
   };
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 8);
   };
 
-  // Clear all filters
   const handleClearFilters = () => {
     navigate("/listings");
     setVisibleCount(20);
+    setSortOption("default");
   };
 
-  // Check if any filters are active
   const hasActiveFilters = cityFilter || priceLevelFilter;
 
   return (
     <>
       <Header />
-      <div className="flex flex-col w-full h-[132px] bg-gray-100 dark:bg-background ">
-        <div className="container mx-auto">
-          <h2 className="text-black font-bold text-4xl mt-5 ml-20 dark:text-white">
+      <div className="flex flex-col w-full h-auto bg-gray-100 dark:bg-background py-5">
+        <div className="container mx-auto px-4 md:px-20">
+          <h2 className="text-black font-bold text-4xl dark:text-white">
             All Listings
           </h2>
-          <div className="flex items-center gap-2 ml-[60px]">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-gray-400 text-2xl mt-2">
               {hasActiveFilters
                 ? "Showing Filtered Results"
@@ -216,8 +279,7 @@ const Listings: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-6 mt-7 flex-wrap">
-        {/* Clear Filters Button */}
+      <div className="flex items-center justify-center gap-6 mt-7 flex-wrap px-4">
         {hasActiveFilters && (
           <button
             onClick={handleClearFilters}
@@ -228,12 +290,11 @@ const Listings: React.FC = () => {
           </button>
         )}
 
-        {/* Dropdown */}
         <select
           className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ef4343] dark:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
           value={sortOption}
           onChange={(e) => handleSort(e.target.value)}
-          disabled={loading}
+          disabled={isLoading}
         >
           <option value="default">Default</option>
           <option value="nearest">Nearest</option>
@@ -243,7 +304,7 @@ const Listings: React.FC = () => {
         <div className="flex gap-2">
           <button
             onClick={() => setViewType("grid")}
-            disabled={loading}
+            disabled={isLoading}
             className={`p-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
       ${
         viewType === "grid"
@@ -266,10 +327,9 @@ const Listings: React.FC = () => {
               />
             </svg>
           </button>
-
           <button
             onClick={() => setViewType("list")}
-            disabled={loading}
+            disabled={isLoading}
             className={`p-3 rounded-xl shadow-md transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed
       ${
         viewType === "list"
@@ -294,13 +354,14 @@ const Listings: React.FC = () => {
           </button>
         </div>
       </div>
+
       {error && (
         <div className="mx-auto max-w-2xl mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600 text-center">{error}</p>
+          <p className="text-red-600 text-center">{error.toString()}</p>
         </div>
       )}
 
-      {loading ? (
+      {isLoading ? (
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 text-[#ef4343] animate-spin" />
@@ -310,7 +371,6 @@ const Listings: React.FC = () => {
           </div>
         </div>
       ) : restaurants.length === 0 ? (
-        // No Results Found
         <div className="flex flex-col items-center justify-center min-h-[400px] px-4">
           <div className="text-center max-w-md">
             <div className="mb-4">
@@ -355,7 +415,11 @@ const Listings: React.FC = () => {
           }
         >
           {restaurants.slice(0, visibleCount).map((item) => (
-            <Link key={item._id} to={`/Listing/${item._id}`}>
+            <Link
+              key={item._id}
+              to={`/listing/${item._id}`}
+              onClick={() => handleListingClick(item._id)}
+            >
               <Card className="group relative overflow-visible transition-all hover:shadow-lg h-full bg-card text-foreground border border-border p-0 pb-5">
                 <CardContent className="p-0">
                   <div className="relative aspect-4/3 overflow-hidden">
@@ -367,11 +431,12 @@ const Listings: React.FC = () => {
                     <Button
                       size="icon"
                       variant="secondary"
-                      className="absolute bottom-3 right-3 h-9 w-9 rounded-full opacity-0 transition-opacity group-hover:opacity-100"
+                      className="absolute bottom-3 right-3 h-9 w-9 rounded-full opacity-0 transition-opacity group-hover:opacity-100 disabled:opacity-50"
                       onClick={(e) => {
                         e.preventDefault();
-                        togglefavorite(item._id);
+                        toggleFavorite(item._id);
                       }}
+                      disabled={toggleFavoriteMutation.isPending}
                     >
                       <Heart
                         className={`h-5 w-5 transition-colors ${
@@ -440,7 +505,7 @@ const Listings: React.FC = () => {
           ))}
         </div>
       )}
-      {!loading && visibleCount < restaurants.length && (
+      {!isLoading && visibleCount < restaurants.length && (
         <div className="flex justify-center mt-8 mb-10">
           <button
             onClick={handleLoadMore}

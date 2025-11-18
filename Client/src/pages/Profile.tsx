@@ -5,7 +5,6 @@ import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Heart, History, MapPin, Star, Trash2 } from "lucide-react";
@@ -24,15 +23,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import img from "../assets/Cardimg.png"; //
 
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
-const PLACES_API_URL = "http://127.0.0.1:5000/api/v1/places";
 
 interface FavoritePlace {
   _id: string;
   name: string;
-  category: string[];
-  ratingsAverage?: number;
 }
 
 interface HistoryItem {
@@ -53,23 +50,16 @@ export default function Profile() {
     queryKey: ["profileFavorites", token],
     queryFn: async () => {
       if (!token) return [];
+
       const favListResponse = await fetch(`${USERS_API_URL}/favorites`, {
-        headers: { Authorization: `Bearer ${token}` }, //
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       if (!favListResponse.ok)
         throw new Error("Failed to fetch favorites list");
-      const favListData = await favListResponse.json();
-      const favs: { _id: string; name: string }[] = favListData.data; //
-      if (favs.length === 0) return [];
 
-      const placeIds = favs.map((fav) => fav._id).join(",");
-      const detailsResponse = await fetch(
-        `${PLACES_API_URL}/search?placeIds=${placeIds}` //
-      );
-      if (!detailsResponse.ok)
-        throw new Error("Failed to fetch favorite details");
-      const detailsData = await detailsResponse.json();
-      return detailsData.data.places;
+      const favListData = await favListResponse.json();
+      return favListData.data;
     },
     enabled: !!token,
   });
@@ -77,18 +67,15 @@ export default function Profile() {
   const deleteFavoriteMutation = useMutation({
     mutationFn: async (placeId: string) => {
       if (!token) throw new Error("Not authenticated");
-      const response = await fetch(
-        `${USERS_API_URL}/favorites/${placeId}`, //
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
+      const response = await fetch(`${USERS_API_URL}/favorites/${placeId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (!response.ok) throw new Error("Failed to remove favorite");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["favorites"] });
       queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
       toast({ title: "Success", description: "Removed from favorites" });
     },
     onError: (error: any) => {
@@ -107,16 +94,18 @@ export default function Profile() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to clear history");
+      if (!response.ok) {
+        try {
+          const errData = await response.json();
+          throw new Error(errData.message || "Failed to clear history");
+        } catch (e) {
+          throw new Error("Failed to clear history");
+        }
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      queryClient.invalidateQueries({ queryKey: ["me"] });
       toast({ title: "Success", description: "History cleared" });
-      queryClient.setQueryData(["userProfile"], (oldData: any) => ({
-        ...oldData,
-        history: [],
-      }));
-      window.location.reload();
     },
     onError: (error: any) => {
       toast({
@@ -128,17 +117,12 @@ export default function Profile() {
   });
 
   const getInitials = (name: string) => {
+    if (!name) return "??";
     const parts = name.split(" ");
-    if (parts.length >= 2) {
+    if (parts.length >= 2 && parts[0] && parts[1]) {
       return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
-  };
-
-  const getUserRole = () => {
-    if (isAdmin) return "Admin";
-    if (isOwner) return "Owner";
-    return "User";
   };
 
   const fullName = user?.name || user?.email?.split("@")[0] || "User";
@@ -165,9 +149,6 @@ export default function Profile() {
                 <div className="flex-1 text-center md:text-left">
                   <h1 className="text-3xl font-bold mb-2">{fullName}</h1>
                   <p className="text-muted-foreground mb-3">{user?.email}</p>
-                  <Badge variant={isAdmin ? "default" : "secondary"}>
-                    {getUserRole()}
-                  </Badge>
                 </div>
               </div>
             </CardContent>
@@ -205,33 +186,20 @@ export default function Profile() {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {favorites.map((item) => (
                         <Card key={item._id} className="overflow-hidden">
-                          <div
-                            className="h-40 bg-muted/50 border-b flex items-center justify-center cursor-pointer"
-                            onClick={() => navigate(`/listings/${item._id}`)}
-                          >
-                            <MapPin className="h-12 w-12 text-muted-foreground/50" />
-                          </div>
+                          <img
+                            src={img}
+                            alt={item.name}
+                            className="h-40 w-full object-cover cursor-pointer"
+                            onClick={() => navigate(`/listing/${item._id}`)}
+                          />
                           <CardContent className="p-4">
                             <h3 className="font-semibold mb-2">{item.name}</h3>
-                            <div className="flex items-center justify-between">
-                              <Badge variant="secondary">
-                                {item.category.join(", ")}
-                              </Badge>
-                              <div className="flex items-center gap-1">
-                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm font-medium">
-                                  {item.ratingsAverage || "N/A"}
-                                </span>
-                              </div>
-                            </div>
                             <div className="mt-3 flex gap-2">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 className="flex-1"
-                                onClick={() =>
-                                  navigate(`/listings/${item._id}`)
-                                }
+                                onClick={() => navigate(`/listing/${item._id}`)}
                               >
                                 <MapPin className="mr-1 h-3 w-3" />
                                 {t("common.view")}
@@ -332,16 +300,18 @@ export default function Profile() {
                     {userHistory.map((item) => (
                       <Card key={item._id} className="overflow-hidden">
                         <div className="flex items-center p-4">
-                          <div className="h-12 w-12 bg-muted rounded-full flex items-center justify-center mr-4">
-                            <MapPin className="h-6 w-6 text-muted-foreground" />
-                          </div>
+                          <img
+                            src={img}
+                            alt={item.name}
+                            className="h-12 w-12 rounded-full object-cover mr-4"
+                          />
                           <div className="flex-1">
                             <h3 className="font-semibold">{item.name}</h3>
                           </div>
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => navigate(`/listings/${item._id}`)}
+                            onClick={() => navigate(`/listing/${item._id}`)}
                           >
                             View
                           </Button>

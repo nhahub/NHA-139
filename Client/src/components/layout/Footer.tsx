@@ -1,5 +1,13 @@
 import { Link } from "react-router-dom";
-import { MapPin, Mail, Phone, Facebook, Twitter, Instagram, Linkedin } from "lucide-react";
+import {
+  MapPin,
+  Mail,
+  Phone,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
 
 export function Footer() {
   return (
@@ -15,7 +23,8 @@ export function Footer() {
               <span className="text-xl font-bold">WhereToGo</span>
             </Link>
             <p className="mt-4 text-sm text-muted-foreground">
-              Discover and connect with great places around the world. Your ultimate directory for local businesses.
+              Discover and connect with great places around the world. Your
+              ultimate directory for local businesses.
             </p>
           </div>
 
@@ -24,22 +33,34 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/listings" className="text-muted-foreground hover:text-primary">
+                <Link
+                  to="/listings"
+                  className="text-muted-foreground hover:text-primary"
+                >
                   Browse Listings
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-primary">
+                <Link
+                  to="/contact"
+                  className="text-muted-foreground hover:text-primary"
+                >
                   Contact Us
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary">
+                <Link
+                  to="/"
+                  className="text-muted-foreground hover:text-primary"
+                >
                   About Us
                 </Link>
               </li>
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary">
+                <Link
+                  to="/"
+                  className="text-muted-foreground hover:text-primary"
+                >
                   Terms of Service
                 </Link>
               </li>
@@ -51,23 +72,35 @@ export function Footer() {
             <h3 className="mb-4 text-sm font-semibold">Categories</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/listings?category=restaurant" className="text-muted-foreground hover:text-primary">
+                <Link
+                  to="/listings?category=restaurant"
+                  className="text-muted-foreground hover:text-primary"
+                >
                   Restaurants
                 </Link>
               </li>
               <li>
-                <Link to="/listings?category=hotel" className="text-muted-foreground hover:text-primary">
-                  Hotels
+                <Link
+                  to="/listings?category=cafe"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  Cafes
                 </Link>
               </li>
               <li>
-                <Link to="/listings?category=shopping" className="text-muted-foreground hover:text-primary">
-                  Shopping
+                <Link
+                  to="/listings?category=coffee shops"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  Coffee Shops
                 </Link>
               </li>
               <li>
-                <Link to="/listings?category=gym" className="text-muted-foreground hover:text-primary">
-                  Fitness
+                <Link
+                  to="/listings?category=Seafood Restaurant"
+                  className="text-muted-foreground hover:text-primary"
+                >
+                  Seafood
                 </Link>
               </li>
             </ul>
@@ -87,7 +120,7 @@ export function Footer() {
               </li>
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 flex-shrink-0" />
-                <span>hello@wheretogo.com</span>
+                <span>whereto@go.com</span>
               </li>
             </ul>
             <div className="mt-4 flex space-x-3">

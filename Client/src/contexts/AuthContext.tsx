@@ -6,6 +6,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 const AUTH_API_URL = "http://127.0.0.1:5000/api/auth";
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
@@ -16,14 +17,13 @@ export interface User {
   email: string;
   role: string;
   profilePicture?: string;
-  favorites?: any[];
-  history?: any[];
+  favorites?: { _id: string; name: string }[];
+  history?: { _id: string; name: string }[];
 }
 
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  userRoles;
   isAdmin: boolean;
   isOwner: boolean;
   isLoading: boolean;
@@ -39,70 +39,67 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const fetchUserProfile = async (token: string): Promise<User> => {
+  const response = await fetch(`${USERS_API_URL}/me`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    throw new Error("Failed to fetch user profile");
+  }
+  const data = await response.json();
+  return data.data.user;
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(() => {
+    return localStorage.getItem("token");
+  });
+  const queryClient = useQueryClient();
+
+  const { data: user = null, isLoading: isUserLoading } = useQuery<User | null>(
+    {
+      queryKey: ["me"],
+      queryFn: async () => {
+        try {
+          const storedToken = localStorage.getItem("token");
+          if (!storedToken) return null;
+          setToken(storedToken);
+          return await fetchUserProfile(storedToken);
+        } catch (error) {
+          localStorage.removeItem("token");
+          setToken(null);
+          return null;
+        }
+      },
+      staleTime: 1000 * 60 * 5,
+      retry: 1,
+    }
+  );
 
   useEffect(() => {
-    const checkUserSession = async () => {
-      const storedToken = localStorage.getItem("token");
-
-      if (!storedToken) {
-        setIsLoading(false);
-        setUser(null);
-        setToken(null);
-        return;
-      }
-
-      try {
-        const response = await fetch(`${USERS_API_URL}/me`, {
-          headers: {
-            Authorization: `Bearer ${storedToken}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.data.user);
-          setToken(storedToken);
-        } else {
-          localStorage.removeItem("token");
-          setUser(null);
-          setToken(null);
-        }
-      } catch (error) {
-        console.error("Failed to fetch user profile:", error);
-        localStorage.removeItem("token");
-        setUser(null);
-        setToken(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkUserSession();
-  }, []);
+    if (token) {
+      localStorage.setItem("token", token);
+    } else {
+      localStorage.removeItem("token");
+    }
+  }, [token]);
 
   const signIn = async (email: string, password: string) => {
     try {
       const response = await fetch(`${AUTH_API_URL}/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         return { error: new Error(data.message || "Login failed") };
       }
 
-      localStorage.setItem("token", data.token);
       setToken(data.token);
-      setUser(data.user);
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
 
       return { error: null };
     } catch (error) {
@@ -121,28 +118,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const response = await fetch(`${AUTH_API_URL}/signup`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: fullName,
-          email,
-          password,
-          role: role,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: fullName, email, password, role }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         return { error: new Error(data.message || "Signup failed") };
       }
-
-      // If you WANT to auto-login, uncomment the lines below.
-      // localStorage.setItem("token", data.token);
-      // setToken(data.token);
-      // setUser(data.user);
-
       return { error: null };
     } catch (error) {
       return {
@@ -152,24 +134,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    localStorage.removeItem("token");
-    setUser(null);
     setToken(null);
+    queryClient.setQueryData(["me"], null); //
   };
 
   const isAdmin = user?.role === "admin";
   const isOwner = user?.role === "owner" || isAdmin;
-  const userRoles = user ? [user.role] : [];
 
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
-        userRoles,
         isAdmin,
         isOwner,
-        isLoading,
+        isLoading: isUserLoading,
         signIn,
         signUp,
         signOut,

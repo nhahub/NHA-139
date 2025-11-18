@@ -12,7 +12,6 @@ import ListingDetails from "./pages/ListingDetail";
 import Contact from "./pages/Contact";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import Favorites from "./pages/Favorites";
 import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import MyListings from "./pages/owner/MyListings";
@@ -46,14 +45,6 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Profile />
-                  </ProtectedRoute>
-                }
-              />
-              <Route
-                path="/favorites"
-                element={
-                  <ProtectedRoute>
-                    <Favorites />
                   </ProtectedRoute>
                 }
               />
