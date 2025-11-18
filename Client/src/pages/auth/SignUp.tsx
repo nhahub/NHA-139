@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
@@ -38,8 +38,14 @@ export default function SignUp() {
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
-  } = useForm<SignUpFormData>();
+  } = useForm<SignUpFormData>({
+    defaultValues: {
+      isOwner: false,
+    },
+  });
+
   const password = watch("password");
 
   useEffect(() => {
@@ -50,7 +56,10 @@ export default function SignUp() {
 
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
-    const role = data.isOwner ? "owner" : "user";
+
+    const isOwnerChecked = Boolean(data.isOwner);
+    const role = isOwnerChecked ? "owner" : "user";
+
     const { error } = await signUp(
       data.email,
       data.password,
@@ -174,8 +183,19 @@ export default function SignUp() {
                   </p>
                 )}
               </div>
+
               <div className="flex items-center space-x-2">
-                <Checkbox id="isOwner" {...register("isOwner")} />
+                <Controller
+                  name="isOwner"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id="isOwner"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
                 <Label
                   htmlFor="isOwner"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
