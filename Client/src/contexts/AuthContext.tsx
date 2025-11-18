@@ -60,19 +60,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const { data: user = null, isLoading: isUserLoading } = useQuery<User | null>(
     {
-      queryKey: ["me"],
+      queryKey: ["me", token],
       queryFn: async () => {
+        if (!token) return null;
+
         try {
-          const storedToken = localStorage.getItem("token");
-          if (!storedToken) return null;
-          setToken(storedToken);
-          return await fetchUserProfile(storedToken);
+          return await fetchUserProfile(token);
         } catch (error) {
           localStorage.removeItem("token");
           setToken(null);
           return null;
         }
       },
+      enabled: !!token,
       staleTime: 1000 * 60 * 5,
       retry: 1,
     }
@@ -135,7 +135,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     setToken(null);
-    queryClient.setQueryData(["me"], null); //
+    queryClient.setQueryData(["me", null], null);
+    queryClient.removeQueries({ queryKey: ["me"] });
   };
 
   const isAdmin = user?.role === "admin";
