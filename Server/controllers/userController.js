@@ -226,20 +226,21 @@ exports.clearHistory = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const user = await User.findById(req.user._id);
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { $set: { history: [] } },
+      { new: true }
+    );
 
-    if (!user) {
+    if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
-    user.history = [];
-
-    const updatedUser = await user.save();
 
     return res
       .status(200)
       .json({ message: "History cleared", data: updatedUser.history });
   } catch (error) {
-    return res.status(400).json({ message: "failed", error: error.message });
+    console.error("Clear history error:", error);
+    return res.status(500).json({ message: "failed", error: error.message });
   }
 };

@@ -71,13 +71,16 @@ export default function Profile() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (!response.ok) {
+        let errorMessage = "Failed to remove favorite";
         try {
           const errData = await response.json();
-          throw new Error(errData.message || "Failed to remove favorite");
+          if (errData.message) errorMessage = errData.message;
         } catch (e) {
-          throw new Error("Failed to remove favorite");
+          // Use default error message if JSON parse fails
         }
+        throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
@@ -101,13 +104,16 @@ export default function Profile() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
+
       if (!response.ok) {
+        let errorMessage = "Failed to clear history";
         try {
           const errData = await response.json();
-          throw new Error(errData.message || "Failed to clear history");
+          if (errData.message) errorMessage = errData.message;
         } catch (e) {
-          throw new Error("Failed to clear history");
+          // Use default error message
         }
+        throw new Error(errorMessage);
       }
     },
     onSuccess: () => {
