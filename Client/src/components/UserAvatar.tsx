@@ -53,7 +53,13 @@ export function UserAvatar({ user }: UserAvatarProps) {
         aria-haspopup="true"
       >
         <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-border hover:ring-primary transition-all">
-          {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName} /> : null}
+          {avatarUrl ? (
+            <AvatarImage
+              src={avatarUrl}
+              alt={fullName}
+              className="object-cover h-full w-full"
+            />
+          ) : null}
           <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
             {getInitials(fullName)}
           </AvatarFallback>
@@ -62,7 +68,13 @@ export function UserAvatar({ user }: UserAvatarProps) {
       <DropdownMenuContent align="end" className="w-64 bg-popover z-50">
         <DropdownMenuLabel className="flex flex-col items-center py-4">
           <Avatar className="h-16 w-16 mb-3">
-            {avatarUrl ? <AvatarImage src={avatarUrl} alt={fullName} /> : null}
+            {avatarUrl ? (
+              <AvatarImage
+                src={avatarUrl}
+                alt={fullName}
+                className="object-cover h-full w-full"
+              />
+            ) : null}
             <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
               {getInitials(fullName)}
             </AvatarFallback>
