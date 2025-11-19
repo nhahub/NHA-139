@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import img from "../assets/Cardimg.png"; //
+import img from "../assets/Cardimg.png";
 
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
 
@@ -71,7 +71,14 @@ export default function Profile() {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to remove favorite");
+      if (!response.ok) {
+        try {
+          const errData = await response.json();
+          throw new Error(errData.message || "Failed to remove favorite");
+        } catch (e) {
+          throw new Error("Failed to remove favorite");
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
@@ -138,9 +145,13 @@ export default function Profile() {
           <Card className="mb-8">
             <CardContent className="pt-6">
               <div className="flex flex-col items-center md:flex-row md:items-start gap-6">
-                <Avatar className="h-24 w-24">
+                <Avatar className="h-24 w-24 border-2 border-border">
                   {avatarUrl ? (
-                    <AvatarImage src={avatarUrl} alt={fullName} />
+                    <AvatarImage
+                      src={avatarUrl}
+                      alt={fullName}
+                      className="object-cover h-full w-full"
+                    />
                   ) : null}
                   <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
                     {getInitials(fullName)}
@@ -186,14 +197,19 @@ export default function Profile() {
                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                       {favorites.map((item) => (
                         <Card key={item._id} className="overflow-hidden">
-                          <img
-                            src={img}
-                            alt={item.name}
-                            className="h-40 w-full object-cover cursor-pointer"
-                            onClick={() => navigate(`/listing/${item._id}`)}
-                          />
+                          <div className="h-40 w-full overflow-hidden">
+                            <img
+                              src={img}
+                              alt={item.name}
+                              className="h-full w-full object-cover cursor-pointer transition-transform hover:scale-105"
+                              onClick={() => navigate(`/listing/${item._id}`)}
+                            />
+                          </div>
+
                           <CardContent className="p-4">
-                            <h3 className="font-semibold mb-2">{item.name}</h3>
+                            <h3 className="font-semibold mb-2 truncate">
+                              {item.name}
+                            </h3>
                             <div className="mt-3 flex gap-2">
                               <Button
                                 size="sm"
@@ -300,13 +316,18 @@ export default function Profile() {
                     {userHistory.map((item) => (
                       <Card key={item._id} className="overflow-hidden">
                         <div className="flex items-center p-4">
-                          <img
-                            src={img}
-                            alt={item.name}
-                            className="h-12 w-12 rounded-full object-cover mr-4"
-                          />
-                          <div className="flex-1">
-                            <h3 className="font-semibold">{item.name}</h3>
+                          <div className="h-12 w-12 rounded-full overflow-hidden mr-4 flex-shrink-0">
+                            <img
+                              src={img}
+                              alt={item.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold truncate">
+                              {item.name}
+                            </h3>
                           </div>
                           <Button
                             size="sm"

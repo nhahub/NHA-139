@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
@@ -18,6 +20,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Loader2, X, Upload } from "lucide-react";
 
 interface SignUpFormData {
   fullName: string;
@@ -29,10 +32,13 @@ interface SignUpFormData {
 
 export default function SignUp() {
   const { t } = useTranslation();
-  const { signUp, user } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
   const [isLoading, setIsLoading] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [profilePreview, setProfilePreview] = useState<string | null>(null);
 
   const {
     register,
@@ -54,32 +60,90 @@ export default function SignUp() {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    return () => {
+      if (profilePreview) URL.revokeObjectURL(profilePreview);
+    };
+  }, [profilePreview]);
+
+  const handleProfilePictureChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        toast({
+          title: "Error",
+          description: "Please select a valid image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      // Check size (e.g. 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image size must be less than 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setProfilePicture(file);
+      const previewUrl = URL.createObjectURL(file);
+      setProfilePreview(previewUrl);
+    }
+  };
+
+  const removeProfilePicture = () => {
+    setProfilePicture(null);
+    if (profilePreview) {
+      URL.revokeObjectURL(profilePreview);
+      setProfilePreview(null);
+    }
+  };
+
   const onSubmit = async (data: SignUpFormData) => {
     setIsLoading(true);
 
-    const isOwnerChecked = Boolean(data.isOwner);
-    const role = isOwnerChecked ? "owner" : "user";
+    const role = data.isOwner ? "owner" : "user";
 
-    const { error } = await signUp(
-      data.email,
-      data.password,
-      data.fullName,
-      role
-    );
-    setIsLoading(false);
+    try {
+      const formData = new FormData();
+      formData.append("name", data.fullName);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      formData.append("role", role);
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
+      if (profilePicture) {
+        formData.append("avatar", profilePicture);
+      }
+
+      const response = await fetch("http://127.0.0.1:5000/api/auth/signup", {
+        method: "POST",
+        body: formData,
       });
-    } else {
+
+      const resData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(resData.message || "Signup failed");
+      }
+
       toast({
         title: "Success",
         description: "Account created successfully! You can now sign in.",
       });
       navigate("/signin");
+    } catch (error: any) {
+      console.error("Signup Error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -102,11 +166,56 @@ export default function SignUp() {
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
+              <div className="flex flex-col items-center space-y-4 mb-6">
+                <div className="relative group">
+                  <div className="w-24 h-24 rounded-full bg-muted border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden relative">
+                    {profilePreview ? (
+                      <img
+                        src={profilePreview}
+                        alt="Profile preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Upload className="h-8 w-8 text-muted-foreground/50" />
+                    )}
+                  </div>
+
+                  {profilePreview && (
+                    <button
+                      type="button"
+                      onClick={removeProfilePicture}
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-destructive text-destructive-foreground rounded-full flex items-center justify-center hover:bg-destructive/90 shadow-sm transition-transform hover:scale-110"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-1 text-center">
+                  <Label
+                    htmlFor="profilePicture"
+                    className="cursor-pointer text-primary hover:text-primary/80 hover:underline text-sm font-medium transition-colors"
+                  >
+                    {profilePreview ? "Change Photo" : "Upload Photo"}
+                  </Label>
+                  <Input
+                    id="profilePicture"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleProfilePictureChange}
+                    disabled={isLoading}
+                  />
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
+                    Optional • Max 5MB
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="fullName">{t("auth.fullName")}</Label>
                 <Input
                   id="fullName"
-                  type="text"
                   placeholder="John Doe"
                   {...register("fullName", {
                     required: "Full name is required",
@@ -198,7 +307,7 @@ export default function SignUp() {
                 />
                 <Label
                   htmlFor="isOwner"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
                   Sign up as an Owner
                 </Label>
@@ -207,7 +316,14 @@ export default function SignUp() {
 
             <CardFooter>
               <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? t("common.loading") : t("auth.signUp")}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t("common.loading")}
+                  </>
+                ) : (
+                  t("auth.signUp")
+                )}
               </Button>
             </CardFooter>
           </form>
