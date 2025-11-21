@@ -21,6 +21,7 @@ import img from "../assets/Cardimg.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from 'react-i18next';
 
 interface Location {
   type: string;
@@ -46,6 +47,8 @@ interface Restaurant {
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
 
 const ListingDetails: React.FC = () => {
+  const { t } = useTranslation();
+
   // Get restaurant ID from URL
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -81,7 +84,7 @@ const ListingDetails: React.FC = () => {
         setLoading(false);
       } catch (err) {
         console.error("Error fetching restaurant:", err);
-        setError("Failed to load restaurant details. Please try again.");
+        setError(t('listing.errorLoad'));
         setLoading(false);
       }
     };
@@ -89,11 +92,10 @@ const ListingDetails: React.FC = () => {
     if (id && token) {
       fetchRestaurant();
     } else if (!token) {
-      // Don't fetch if not logged in
       setLoading(false);
-      setError("You must be logged in to view details.");
+      setError(t('listing.loginRequired'));
     }
-  }, [id, token]);
+  }, [id, token, t]);
 
   useEffect(() => {
     if (user && user.favorites && id) {
@@ -110,7 +112,7 @@ const ListingDetails: React.FC = () => {
       placeId: string;
       isCurrentlyFavorite: boolean;
     }) => {
-      if (!token) throw new Error("Please log in to add favorites.");
+      if (!token) throw new Error(t('listing.loginRequired'));
 
       const url = `${USERS_API_URL}/favorites${
         isCurrentlyFavorite ? `/${placeId}` : ""
@@ -132,7 +134,7 @@ const ListingDetails: React.FC = () => {
       const response = await fetch(url, options);
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.message || "Failed to update favorite");
+        throw new Error(err.message || t('listing.errorFavorite'));
       }
     },
     onSuccess: (data, variables) => {
@@ -144,15 +146,15 @@ const ListingDetails: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
 
       toast({
-        title: "Success",
+        title: t('listing.success'),
         description: isCurrentlyFavorite
-          ? "Removed from favorites"
-          : "Added to favorites",
+          ? t('listing.removedFavorite')
+          : t('listing.addedFavorite'),
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t('listing.error'),
         description: error.message,
         variant: "destructive",
       });
@@ -163,8 +165,8 @@ const ListingDetails: React.FC = () => {
     if (!id) return;
     if (!token) {
       toast({
-        title: "Login Required",
-        description: "Please log in to manage your favorites.",
+        title: t('listing.loginRequired'),
+        description: t('listing.loginToFavorite'),
         variant: "destructive",
       });
       return;
@@ -175,7 +177,6 @@ const ListingDetails: React.FC = () => {
     });
   };
 
-  // Go back to listings
   const goBack = () => {
     navigate("/listings");
   };
@@ -188,11 +189,10 @@ const ListingDetails: React.FC = () => {
   };
 
   const renderPriceLevel = (level?: number) => {
-    if (!level) return "N/A";
+    if (!level) return t('listing.nA');
     return "£".repeat(level) + "£".repeat(4 - level).replace(/£/g, "·");
   };
 
-  // Loading state
   if (loading) {
     return (
       <>
@@ -201,7 +201,7 @@ const ListingDetails: React.FC = () => {
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 text-[#ef4343] animate-spin" />
             <p className="text-gray-600 dark:text-gray-400">
-              Loading details...
+              {t('listing.loading')}
             </p>
           </div>
         </div>
@@ -210,7 +210,6 @@ const ListingDetails: React.FC = () => {
     );
   }
 
-  // Error state
   if (error || !restaurant) {
     return (
       <>
@@ -219,13 +218,13 @@ const ListingDetails: React.FC = () => {
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-red-50 border border-red-200 rounded-lg p-8">
               <p className="text-red-600 text-lg mb-4">
-                {error || "Restaurant not found"}
+                {error || t('listing.notFound')}
               </p>
               <Button
                 onClick={goBack}
                 className="bg-[#ef4343] hover:bg-[#ff7e7e] text-white"
               >
-                Back to Listings
+                {t('listing.backToListings')}
               </Button>
             </div>
           </div>
@@ -235,12 +234,10 @@ const ListingDetails: React.FC = () => {
     );
   }
 
-  // Main content
   return (
     <>
       <Header />
 
-      {/* Back Button */}
       <div className="container mx-auto px-6 py-4">
         <Button
           onClick={goBack}
@@ -248,16 +245,13 @@ const ListingDetails: React.FC = () => {
           className="flex items-center gap-2 hover:bg-[#ff7e7e] dark:hover:bg-[#ff7e7e]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Listings
+          {t('listing.backToListings')}
         </Button>
       </div>
 
-      {/* Main Content */}
       <div className="container mx-auto px-6 py-8 mb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Image and Basic Info */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Hero Image */}
             <div className="relative rounded-lg overflow-hidden shadow-lg">
               <img
                 src={img}
@@ -265,7 +259,6 @@ const ListingDetails: React.FC = () => {
                 className="w-full h-[400px] object-cover"
               />
 
-              {/* Favorite Button */}
               <Button
                 size="icon"
                 onClick={toggleFavorite}
@@ -285,21 +278,18 @@ const ListingDetails: React.FC = () => {
                 />
               </Button>
 
-              {/* Category Badge */}
               <div className="absolute top-4 left-4">
                 <span className="px-4 py-2 bg-[#ef4343] text-white text-sm font-semibold rounded-full shadow-lg">
-                  {restaurant.category?.[0] || "Restaurant"}
+                  {restaurant.category?.[0] || t('listing.restaurant')}
                 </span>
               </div>
             </div>
 
-            {/* Restaurant Name and Rating */}
             <div>
               <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
                 {restaurant.name}
               </h1>
 
-              {/* Rating Section */}
               <div className="flex items-center gap-6 mb-4">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1 bg-[#ef4343] px-3 py-1 rounded-lg">
@@ -310,7 +300,8 @@ const ListingDetails: React.FC = () => {
                   </div>
                 </div>
                 <span className="text-gray-600 dark:text-gray-400">
-                  {restaurant.ratingsQuantity?.toLocaleString() || 0} reviews
+                  {restaurant.ratingsQuantity?.toLocaleString() || 0}{" "}
+                  {t('listing.reviews')}
                 </span>
                 <span className="text-[#ef4343] dark:text-[#ef4343] text-lg">
                   <span className="text-gray-500">£:</span>
@@ -318,53 +309,30 @@ const ListingDetails: React.FC = () => {
                 </span>
               </div>
 
-              {/* City with Icon */}
               <div className="flex items-center gap-2 text-lg text-gray-700 dark:text-gray-300">
                 <MapPin className="h-5 w-5 text-[#ef4343]" />
                 <span className="font-medium">{restaurant.city}</span>
               </div>
             </div>
 
-            {/* About Section */}
             <Card>
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="text-[#ef4343]">●</span>
-                  About This Place
+                  {t('listing.about')}
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-                  Welcome to{" "}
-                  <span className="font-semibold">{restaurant.name}</span>,
-                  located in the heart of {restaurant.city}.
-                  {restaurant.category && restaurant.category.length > 0 && (
-                    <>
-                      {" "}
-                      Specializing in {restaurant.category[0].toLowerCase()}, we
-                      offer an exceptional dining experience with quality
-                      service and atmosphere.
-                    </>
-                  )}
-                  {restaurant.ratingsAverage &&
-                    restaurant.ratingsAverage >= 4 && (
-                      <>
-                        {" "}
-                        With a {restaurant.ratingsAverage.toFixed(1)}-star
-                        rating from
-                        {restaurant.ratingsQuantity} happy customers, we pride
-                        ourselves on delivering excellence.
-                      </>
-                    )}
+                  {t('listing.aboutText', { name: restaurant.name, city: restaurant.city, category: restaurant.category?.[0] || '' })}
                 </p>
               </CardContent>
             </Card>
 
-            {/* All Categories */}
             {restaurant.category && restaurant.category.length > 0 && (
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                     <span className="text-[#ef4343]">●</span>
-                    Categories
+                    {t('listing.categories')}
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {restaurant.category.map((cat, index) => (
@@ -381,22 +349,20 @@ const ListingDetails: React.FC = () => {
             )}
           </div>
 
-          {/* Right Column - Contact Info Card (Sticky) */}
           <div className="lg:col-span-1">
             <Card className="sticky top-6 shadow-xl border-2 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6 space-y-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b-2 border-[#ef4343] pb-3">
-                  Contact Information
+                  {t('listing.contactInfo')}
                 </h2>
 
-                {/* Address */}
                 {restaurant.address && (
                   <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-start gap-3">
                       <MapPin className="h-5 w-5 text-[#ef4343] mt-1 flex-shrink-0" />
                       <div className="flex-1">
                         <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                          Address
+                          {t('listing.address')}
                         </p>
                         <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
                           {restaurant.address}
@@ -409,7 +375,7 @@ const ListingDetails: React.FC = () => {
                             className="mt-3 w-full text-[#ef4343] border-[#ef4343] hover:bg-[#ef4343] hover:text-white"
                           >
                             <Navigation className="h-4 w-4 mr-2" />
-                            Open in Maps
+                            {t('listing.openInMaps')}
                           </Button>
                         )}
                       </div>
@@ -417,13 +383,12 @@ const ListingDetails: React.FC = () => {
                   </div>
                 )}
 
-                {/* Phone */}
                 <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-start gap-3">
                     <Phone className="h-5 w-5 text-[#ef4343] mt-1 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                        Phone
+                        {t('listing.phone')}
                       </p>
                       {restaurant.phone ? (
                         <a
@@ -434,20 +399,19 @@ const ListingDetails: React.FC = () => {
                         </a>
                       ) : (
                         <p className="text-gray-500 dark:text-gray-400 italic">
-                          Coming soon
+                          {t('listing.phoneComingSoon')}
                         </p>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Website */}
                 <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-start gap-3">
                     <Globe className="h-5 w-5 text-[#ef4343] mt-1 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                        Website
+                        {t('listing.website')}
                       </p>
                       {restaurant.website ? (
                         <a
@@ -456,33 +420,32 @@ const ListingDetails: React.FC = () => {
                           rel="noopener noreferrer"
                           className="text-[#ef4343] hover:underline font-medium break-all text-sm"
                         >
-                          Visit Website
+                          {t('listing.visitWebsite')}
                         </a>
                       ) : (
                         <p className="text-gray-500 dark:text-gray-400 italic">
-                          Not available
+                          {t('listing.notAvailable')}
                         </p>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Price Level */}
                 <div className="space-y-2 pb-4">
                   <div className="flex items-start gap-3">
                     <span className="text-[#ef4343] text-xl mt-0.5">£</span>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                        Price Level
+                        {t('listing.priceLevel')}
                       </p>
                       <div className="text-2xl font-bold text-[#ef4343]">
                         {restaurant.priceLevel}
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {restaurant.priceLevel === 1 && "Budget-friendly"}
-                        {restaurant.priceLevel === 2 && "Moderate"}
-                        {restaurant.priceLevel === 3 && "Upscale"}
-                        {restaurant.priceLevel === 4 && "Fine dining"}
+                        {restaurant.priceLevel === 1 && t('listing.budget')}
+                        {restaurant.priceLevel === 2 && t('listing.moderate')}
+                        {restaurant.priceLevel === 3 && t('listing.upscale')}
+                        {restaurant.priceLevel === 4 && t('listing.fineDining')}
                       </p>
                     </div>
                   </div>
@@ -498,10 +461,10 @@ const ListingDetails: React.FC = () => {
                   {restaurant.phone ? (
                     <>
                       <Phone className="h-5 w-5 mr-2" />
-                      Call Now
+                      {t('listing.callNow')}
                     </>
                   ) : (
-                    "Phone Coming Soon"
+                    t('listing.phoneComingSoon')
                   )}
                 </Button>
               </CardContent>

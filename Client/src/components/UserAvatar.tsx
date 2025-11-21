@@ -42,17 +42,18 @@ export function UserAvatar({ user }: UserAvatarProps) {
     navigate("/signin");
   };
 
-  const fullName = user.name || user.email?.split("@")[0] || "User";
+  // Ensure 'common.user' is used as the absolute fallback
+  const fullName = user.name || user.email?.split("@")[0] || t("common.user");
   const avatarUrl = user.profilePicture;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
         className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
-        aria-label={`User menu for ${fullName}`}
+        aria-label={t("nav.profile")} // Use profile translation for accessibility label
         aria-haspopup="true"
       >
-        <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-border hover:ring-primary transition-all">
+        <Avatar className="h-10 w-10 cursor-pointer ring-2 ring-border hover:ring-[#ef4343] transition-all">
           {avatarUrl ? (
             <AvatarImage
               src={avatarUrl}
@@ -60,12 +61,12 @@ export function UserAvatar({ user }: UserAvatarProps) {
               className="object-cover h-full w-full"
             />
           ) : null}
-          <AvatarFallback className="bg-primary text-primary-foreground font-semibold">
+          <AvatarFallback className="bg-[#ef4343] text-primary-foreground font-semibold">
             {getInitials(fullName)}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64 bg-popover z-50">
+      <DropdownMenuContent align="end" className="w-64 bg-popover z-50 dark:bg-gray-800 dark:border-gray-700">
         <DropdownMenuLabel className="flex flex-col items-center py-4">
           <Avatar className="h-16 w-16 mb-3">
             {avatarUrl ? (
@@ -75,41 +76,54 @@ export function UserAvatar({ user }: UserAvatarProps) {
                 className="object-cover h-full w-full"
               />
             ) : null}
-            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
+            <AvatarFallback className="bg-[#ef4343] text-primary-foreground text-xl font-bold">
               {getInitials(fullName)}
             </AvatarFallback>
           </Avatar>
           <div className="text-center">
-            <p className="font-semibold text-foreground">{fullName}</p>
-            <p className="text-sm text-muted-foreground">{user.email}</p>
+            <p className="font-semibold text-foreground dark:text-white">{fullName}</p>
+            <p className="text-sm text-muted-foreground dark:text-gray-400">{user.email}</p>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="dark:bg-gray-700" />
 
         {(isAdmin || isOwner) && (
           <DropdownMenuItem
             onClick={() => navigate(getDashboardPath())}
-            className="cursor-pointer"
+            className="cursor-pointer dark:text-gray-300 dark:hover:bg-gray-700"
           >
-            <LayoutDashboard className="mr-2 h-4 w-4" />
+            <LayoutDashboard className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
             {t("nav.dashboard")}
           </DropdownMenuItem>
         )}
 
         <DropdownMenuItem
           onClick={() => navigate("/profile")}
-          className="cursor-pointer"
+          className="cursor-pointer dark:text-gray-300 dark:hover:bg-gray-700"
         >
-          <UserIcon className="mr-2 h-4 w-4" />
+          <UserIcon className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
           {t("nav.profile")}
         </DropdownMenuItem>
+        
+        {/* If the user is a standard user, they might have a "Favorites" link, 
+             but since it's covered by /profile, we can just use the profile link. 
+             If you want a separate Favorites link: */}
+        {!(isAdmin || isOwner) && (
+             <DropdownMenuItem
+                onClick={() => navigate("/profile#favorites")}
+                className="cursor-pointer dark:text-gray-300 dark:hover:bg-gray-700"
+              >
+                <Heart className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
+                {t("nav.favorites")}
+              </DropdownMenuItem>
+        )}
 
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="dark:bg-gray-700" />
         <DropdownMenuItem
           onClick={handleSignOut}
-          className="cursor-pointer text-destructive focus:text-destructive"
+          className="cursor-pointer text-destructive focus:text-destructive dark:text-red-400 dark:hover:bg-red-900/20"
         >
-          <LogOut className="mr-2 h-4 w-4" />
+          <LogOut className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
           {t("nav.signout")}
         </DropdownMenuItem>
       </DropdownMenuContent>

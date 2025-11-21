@@ -1,20 +1,33 @@
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next"; // 1. Import useTranslation
 
 const NotFound = () => {
   const location = useLocation();
+  const { t } = useTranslation(); // 2. Initialize translation hook
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
-  }, [location.pathname]);
+    // 3. Translate the console error log
+    console.error(`404 Error: ${t('notFound.errorLog')}`, location.pathname);
+  }, [location.pathname, t]); // Add 't' to the dependency array
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-background">
       <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">404</h1>
-        <p className="mb-4 text-xl text-gray-600">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 underline hover:text-blue-700">
-          Return to Home
+        {/* 4. The 404 code remains untranslated */}
+        <h1 className="mb-4 text-6xl font-extrabold text-[#ef4343] dark:text-white">404</h1>
+        
+        {/* 5. Translate the main message */}
+        <p className="mb-8 text-xl text-gray-600 dark:text-gray-300">
+          {t('notFound.title')}
+        </p>
+        
+        {/* 6. Translate the link text */}
+        <a 
+          href="/" 
+          className="px-6 py-3 bg-[#ef4343] text-white rounded-lg hover:bg-[#ff7e7e] transition font-semibold"
+        >
+          {t('notFound.returnHome')}
         </a>
       </div>
     </div>

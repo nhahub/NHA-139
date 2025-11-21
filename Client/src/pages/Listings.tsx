@@ -21,6 +21,7 @@ import { Footer } from "@/components/layout/Footer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 
 interface Restaurant {
   _id: string;
@@ -41,6 +42,7 @@ const PLACES_API_URL = "http://127.0.0.1:5000/api/v1/places";
 const Listings: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { t } = useTranslation(); // Initialize translation hook
 
   const { user, token } = useAuth();
   const { toast } = useToast();
@@ -59,6 +61,7 @@ const Listings: React.FC = () => {
     queryKey: ["listings", cityFilter, priceLevelFilter, sortOption],
     queryFn: async () => {
       if (!token) {
+        // Handle case where user is not logged in but tries to access listings
         return { data: { places: [] } };
       }
 
@@ -76,8 +79,8 @@ const Listings: React.FC = () => {
         } catch (err) {
           console.error("Could not get location for sorting", err);
           toast({
-            title: "Error",
-            description: "Could not get your location for sorting.",
+            title: t("toast.error.title"), // Translated
+            description: t("toast.error.location"), // Translated
             variant: "destructive",
           });
         }
@@ -122,7 +125,7 @@ const Listings: React.FC = () => {
       placeId: string;
       isCurrentlyFavorite: boolean;
     }) => {
-      if (!token) throw new Error("Please log in to add favorites.");
+      if (!token) throw new Error(t("toast.error.failedUpdate")); // Translated error message
 
       const url = `${USERS_API_URL}/favorites${
         isCurrentlyFavorite ? `/${placeId}` : ""
@@ -144,7 +147,7 @@ const Listings: React.FC = () => {
       const response = await fetch(url, options);
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.message || "Failed to update favorite");
+        throw new Error(err.message || t("toast.error.failedUpdate")); // Translated error message
       }
     },
     onSuccess: (data, variables) => {
@@ -157,15 +160,15 @@ const Listings: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
 
       toast({
-        title: "Success",
+        title: t("common.save"), // Using generic 'Save' or similar for Success
         description: isCurrentlyFavorite
-          ? "Removed from favorites"
-          : "Added to favorites",
+          ? t("toast.favSuccess.removed") // Translated
+          : t("toast.favSuccess.added"), // Translated
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("toast.error.title"), // Translated
         description: error.message,
         variant: "destructive",
       });
@@ -175,8 +178,8 @@ const Listings: React.FC = () => {
   const toggleFavorite = (id: string) => {
     if (!token) {
       toast({
-        title: "Login Required",
-        description: "Please log in to manage your favorites.",
+        title: t("toast.loginRequired.title"), // Translated
+        description: t("toast.loginRequired.desc"), // Translated
         variant: "destructive",
       });
       return;
@@ -253,13 +256,13 @@ const Listings: React.FC = () => {
       <div className="flex flex-col w-full h-auto bg-gray-100 dark:bg-background py-5">
         <div className="container mx-auto px-4 md:px-20">
           <h2 className="text-black font-bold text-4xl dark:text-white">
-            All Listings
+            {t("allListings")} {/* Translated */}
           </h2>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-gray-400 text-2xl mt-2">
               {hasActiveFilters
-                ? "Showing Filtered Results"
-                : "Showing All results"}
+                ? t("filteredResults") // Translated
+                : t("showingAllResults")} {/* Translated */}
             </span>
             {hasActiveFilters && (
               <div className="flex items-center gap-2 mt-2">
@@ -283,22 +286,22 @@ const Listings: React.FC = () => {
         {hasActiveFilters && (
           <button
             onClick={handleClearFilters}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors font-medium dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
           >
             <X className="w-4 h-4" />
-            Clear Filters
+            {t("clearFilters")} {/* Translated */}
           </button>
         )}
 
         <select
-          className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ef4343] dark:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+          className="border border-gray-300 rounded-lg px-4 py-2 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#ef4343] dark:bg-white dark:border-gray-500 disabled:opacity-50 disabled:cursor-not-allowed"
           value={sortOption}
           onChange={(e) => handleSort(e.target.value)}
           disabled={isLoading}
         >
-          <option value="default">Default</option>
-          <option value="nearest">Nearest</option>
-          <option value="highRating">Highest Rating</option>
+          <option value="default">{t("sort.default")}</option> {/* Translated */}
+          <option value="nearest">{t("sort.nearest")}</option> {/* Translated */}
+          <option value="highRating">{t("sort.highestRating")}</option> {/* Translated */}
         </select>
 
         <div className="flex gap-2">
@@ -309,7 +312,7 @@ const Listings: React.FC = () => {
       ${
         viewType === "grid"
           ? "bg-[#ef4343] text-white"
-          : "bg-white text-gray-700 border border-gray-300 hover:bg-[#ffe1e1] hover:text-[#ef4343]"
+          : "bg-white text-gray-700 border border-gray-300 hover:bg-[#ffe1e1] hover:text-[#ef4343] dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
       }`}
           >
             <svg
@@ -334,7 +337,7 @@ const Listings: React.FC = () => {
       ${
         viewType === "list"
           ? "bg-[#ef4343] text-white"
-          : "bg-white text-gray-700 border border-gray-300 hover:bg-[#ffe1e1] hover:text-[#ef4343]"
+          : "bg-white text-gray-700 border border-gray-300 hover:bg-[#ffe1e1] hover:text-[#ef4343] dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600"
       }`}
           >
             <svg
@@ -366,7 +369,7 @@ const Listings: React.FC = () => {
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 text-[#ef4343] animate-spin" />
             <p className="text-gray-600 dark:text-gray-400">
-              Loading restaurants...
+              {t("loadingPlaces")} {/* Translated */}
             </p>
           </div>
         </div>
@@ -389,19 +392,19 @@ const Listings: React.FC = () => {
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-              No Places Found
+              {t("noPlaces")} {/* Translated */}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               {hasActiveFilters
-                ? "We couldn't find any places matching your filters. Try adjusting your search criteria."
-                : "No places are currently available."}
+                ? t("noPlacesFiltered") // Translated
+                : t("noPlacesAvailable")} {/* Translated */}
             </p>
             {hasActiveFilters && (
               <button
                 onClick={handleClearFilters}
                 className="px-6 py-3 bg-[#ef4343] text-white rounded-lg hover:bg-[#ff7e7e] transition font-semibold"
               >
-                Clear All Filters
+                {t("clearAllFilters")} {/* Translated */}
               </button>
             )}
           </div>
@@ -411,7 +414,7 @@ const Listings: React.FC = () => {
           className={
             viewType === "grid"
               ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 p-6"
-              : "grid grid-cols-1 gap-6 p-15 md:w-[40%] mr-auto ml-auto mt-4"
+              : "grid grid-cols-1 gap-6 p-6 md:w-[40%] mx-auto mt-4"
           }
         >
           {restaurants.slice(0, visibleCount).map((item) => (
@@ -456,7 +459,7 @@ const Listings: React.FC = () => {
                       <span className="relative group inline-block max-w-[80px] truncate border border-gray-400 text-gray-700 text-sm font-medium px-1 rounded-full dark:text-white">
                         {item.category && item.category.length > 0
                           ? item.category[0]
-                          : "Not Found"}
+                          : t("listing.notFound")} {/* Translated */}
                       </span>
                     </div>
                   </CardTitle>
@@ -466,12 +469,12 @@ const Listings: React.FC = () => {
                 </CardHeader>
 
                 <CardFooter>
-                  <div className="flex flex-col">
+                  <div className="flex flex-col w-full">
                     <h5 className="text-gray-500">{item.address}</h5>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between w-full mt-2">
                       <div className="flex items-center space-x-1">
                         <Star
-                          className="h-4 w-4  text-[#ef4343]"
+                          className="h-4 w-4 text-[#ef4343]"
                           stroke="currentColor"
                           fill="currentColor"
                         />
@@ -479,23 +482,21 @@ const Listings: React.FC = () => {
                           {item.ratingsAverage}
                         </span>
                       </div>
-                      <div className="text-lg font-bold text-gray-500 ">
-                        Price Level {"\u2191"}:
-                        <span className="text-[#ef4343]">
-                          {item.priceLevel}
-                        </span>
+                      <div className="text-lg font-bold text-gray-500">
+                        {t("listing.priceLevel")}{" "} {/* Translated */}
+                        <span className="text-[#ef4343]">{item.priceLevel}</span>
                       </div>
                     </div>
 
                     {item.phone ? (
-                      <div className="mt-3 flex items-center space-x-2 text-sm  text-gray-500">
+                      <div className="mt-3 flex items-center space-x-2 text-sm text-gray-500">
                         <Phone className="h-3 w-3 text-[#ef4343]" />
                         <span>{item.phone}</span>
                       </div>
                     ) : (
-                      <div className="mt-3 flex items-center space-x-2 text-sm  text-gray-500">
+                      <div className="mt-3 flex items-center space-x-2 text-sm text-gray-500">
                         <Phone className="h-3 w-3" />
-                        <span>SOON!</span>
+                        <span>{t("listing.phoneSoon")}</span> {/* Translated */}
                       </div>
                     )}
                   </div>
@@ -511,7 +512,8 @@ const Listings: React.FC = () => {
             onClick={handleLoadMore}
             className="px-5 py-2 bg-[#ef4343] text-white rounded-lg hover:bg-[#ff7e7e] transition"
           >
-            Load More ({restaurants.length - visibleCount} remaining)
+            {t("loadMore")}{" "}
+            ({restaurants.length - visibleCount} {t("remaining")})
           </button>
         </div>
       )}
