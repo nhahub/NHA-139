@@ -40,14 +40,14 @@ export default function SignIn() {
 
     if (error) {
       toast({
-        title: 'Error',
+        title: t('toast.error.title'), // Translated
         description: error.message,
         variant: 'destructive',
       });
     } else {
       toast({
-        title: 'Success',
-        description: 'Signed in successfully',
+        title: t('toast.signInSuccess.title'), // Translated
+        description: t('toast.signInSuccess.desc'), // Translated
       });
       navigate('/');
     }
@@ -57,63 +57,68 @@ export default function SignIn() {
     <div className="flex min-h-screen flex-col">
       <Header />
       
-      <div className="flex flex-1 items-center justify-center bg-muted/30 px-4 py-12">
-        <Card className="w-full max-w-md">
+      <div className="flex flex-1 items-center justify-center bg-muted/30 px-4 py-12 dark:bg-gray-900">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">{t('auth.signIn')}</CardTitle>
-            <CardDescription>
-              {t('auth.noAccount')} <Link to="/signup" className="text-primary hover:underline">{t('auth.signUp')}</Link>
+            <CardTitle className="text-2xl font-bold dark:text-white">{t('auth.signIn')}</CardTitle>
+            <CardDescription className="dark:text-gray-400">
+              {t('auth.noAccount')} <Link to="/signup" className="text-[#ef4343] hover:underline">{t('auth.signUp')}</Link>
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
+              {/* Email Input */}
               <div className="space-y-2">
-                <Label htmlFor="email">{t('auth.email')}</Label>
+                <Label htmlFor="email" className="dark:text-gray-300">{t('auth.email')}</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="name@example.com"
                   {...register('email', {
-                    required: 'Email is required',
+                    required: t('auth.validation.requiredEmail'), // Translated validation
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
+                      message: t('auth.validation.invalidEmail'), // Translated validation
                     },
                   })}
+                  className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive">{errors.email.message}</p>
                 )}
               </div>
               
+              {/* Password Input */}
               <div className="space-y-2">
-                <Label htmlFor="password">{t('auth.password')}</Label>
+                <Label htmlFor="password" className="dark:text-gray-300">{t('auth.password')}</Label>
                 <Input
                   id="password"
                   type="password"
                   {...register('password', {
-                    required: 'Password is required',
+                    required: t('auth.validation.requiredPassword'), // Translated validation
                     minLength: {
                       value: 6,
-                      message: 'Password must be at least 6 characters',
+                      message: t('auth.validation.passwordMinLength'), // Translated validation
                     },
                   })}
+                  className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password.message}</p>
                 )}
               </div>
               
+              {/* Checkbox and Forgot Password Link */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Checkbox id="remember" {...register('rememberMe')} />
-                  <Label htmlFor="remember" className="text-sm cursor-pointer">
+                  <Label htmlFor="remember" className="text-sm cursor-pointer dark:text-gray-300">
                     {t('auth.rememberMe')}
                   </Label>
                 </div>
                 <Link 
                   to="/forgot-password" 
-                  className="text-sm text-primary hover:underline"
+                  className="text-sm text-[#ef4343] hover:underline"
                 >
                   {t('auth.forgotPassword')}
                 </Link>
@@ -121,7 +126,7 @@ export default function SignIn() {
             </CardContent>
             
             <CardFooter>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-[#ef4343] hover:bg-[#ff7e7e]" disabled={isLoading}>
                 {isLoading ? t('common.loading') : t('auth.signIn')}
               </Button>
             </CardFooter>

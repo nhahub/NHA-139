@@ -73,8 +73,8 @@ export default function SignUp() {
     if (file) {
       if (!file.type.startsWith("image/")) {
         toast({
-          title: "Error",
-          description: "Please select a valid image file",
+          title: t("toast.error.title"), // Translated
+          description: t("toast.uploadError.invalidImage"), // Translated
           variant: "destructive",
         });
         return;
@@ -82,8 +82,8 @@ export default function SignUp() {
       // Check size (e.g. 5MB)
       if (file.size > 5 * 1024 * 1024) {
         toast({
-          title: "Error",
-          description: "Image size must be less than 5MB",
+          title: t("toast.error.title"), // Translated
+          description: t("toast.uploadError.size"), // Translated
           variant: "destructive",
         });
         return;
@@ -127,19 +127,19 @@ export default function SignUp() {
       const resData = await response.json();
 
       if (!response.ok) {
-        throw new Error(resData.message || "Signup failed");
+        throw new Error(resData.message || t("toast.error.signUpFailed")); // Translated error
       }
 
       toast({
-        title: "Success",
-        description: "Account created successfully! You can now sign in.",
+        title: t("common.success"), // Translated
+        description: t("toast.signUpSuccess.desc"), // Translated
       });
       navigate("/signin");
     } catch (error: any) {
       console.error("Signup Error:", error);
       toast({
-        title: "Error",
-        description: error.message || "Something went wrong",
+        title: t("toast.error.title"), // Translated
+        description: error.message || t("toast.error.somethingWrong"), // Translated
         variant: "destructive",
       });
     } finally {
@@ -151,32 +151,33 @@ export default function SignUp() {
     <div className="flex min-h-screen flex-col">
       <Header />
 
-      <div className="flex flex-1 items-center justify-center bg-muted/30 px-4 py-12">
-        <Card className="w-full max-w-md">
+      <div className="flex flex-1 items-center justify-center bg-muted/30 px-4 py-12 dark:bg-gray-900">
+        <Card className="w-full max-w-md dark:bg-gray-800 dark:border-gray-700">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold">
+            <CardTitle className="text-2xl font-bold dark:text-white">
               {t("auth.signUp")}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="dark:text-gray-400">
               {t("auth.hasAccount")}{" "}
-              <Link to="/signin" className="text-primary hover:underline">
+              <Link to="/signin" className="text-[#ef4343] hover:underline">
                 {t("auth.signIn")}
               </Link>
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent className="space-y-4">
+              {/* Profile Picture Upload Section */}
               <div className="flex flex-col items-center space-y-4 mb-6">
                 <div className="relative group">
-                  <div className="w-24 h-24 rounded-full bg-muted border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden relative">
+                  <div className="w-24 h-24 rounded-full bg-muted border-2 border-dashed border-muted-foreground/25 flex items-center justify-center overflow-hidden relative dark:bg-gray-700">
                     {profilePreview ? (
                       <img
                         src={profilePreview}
-                        alt="Profile preview"
+                        alt={t("upload.uploadPhoto")} // Fallback translated alt text
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Upload className="h-8 w-8 text-muted-foreground/50" />
+                      <Upload className="h-8 w-8 text-muted-foreground/50 dark:text-gray-500" />
                     )}
                   </div>
 
@@ -194,9 +195,9 @@ export default function SignUp() {
                 <div className="space-y-1 text-center">
                   <Label
                     htmlFor="profilePicture"
-                    className="cursor-pointer text-primary hover:text-primary/80 hover:underline text-sm font-medium transition-colors"
+                    className="cursor-pointer text-[#ef4343] hover:text-[#ff7e7e] hover:underline text-sm font-medium transition-colors"
                   >
-                    {profilePreview ? "Change Photo" : "Upload Photo"}
+                    {profilePreview ? t("upload.changePhoto") : t("upload.uploadPhoto")}
                   </Label>
                   <Input
                     id="profilePicture"
@@ -206,24 +207,25 @@ export default function SignUp() {
                     onChange={handleProfilePictureChange}
                     disabled={isLoading}
                   />
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">
-                    Optional • Max 5MB
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide dark:text-gray-500">
+                    {t("upload.optionalMax")}
                   </p>
                 </div>
               </div>
-
+              {/* Full Name Input */}
               <div className="space-y-2">
-                <Label htmlFor="fullName">{t("auth.fullName")}</Label>
+                <Label htmlFor="fullName" className="dark:text-gray-300">{t("auth.fullName")}</Label>
                 <Input
                   id="fullName"
                   placeholder="John Doe"
                   {...register("fullName", {
-                    required: "Full name is required",
+                    required: t("auth.validation.requiredFullName"), // Translated validation
                     minLength: {
                       value: 2,
-                      message: "Name must be at least 2 characters",
+                      message: t("auth.validation.fullNameMinLength"), // Translated validation
                     },
                   })}
+                  className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
                 {errors.fullName && (
                   <p className="text-sm text-destructive">
@@ -231,20 +233,21 @@ export default function SignUp() {
                   </p>
                 )}
               </div>
-
+              {/* Email Input */}
               <div className="space-y-2">
-                <Label htmlFor="email">{t("auth.email")}</Label>
+                <Label htmlFor="email" className="dark:text-gray-300">{t("auth.email")}</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="name@example.com"
                   {...register("email", {
-                    required: "Email is required",
+                    required: t("auth.validation.requiredEmail"), // Reused/Translated validation
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
+                      message: t("auth.validation.invalidEmail"), // Reused/Translated validation
                     },
                   })}
+                  className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive">
@@ -252,19 +255,20 @@ export default function SignUp() {
                   </p>
                 )}
               </div>
-
+              {/* Password Input */}
               <div className="space-y-2">
-                <Label htmlFor="password">{t("auth.password")}</Label>
+                <Label htmlFor="password" className="dark:text-gray-300">{t("auth.password")}</Label>
                 <Input
                   id="password"
                   type="password"
                   {...register("password", {
-                    required: "Password is required",
+                    required: t("auth.validation.requiredPassword"), // Reused/Translated validation
                     minLength: {
                       value: 6,
-                      message: "Password must be at least 6 characters",
+                      message: t("auth.validation.passwordMinLength"), // Reused/Translated validation
                     },
                   })}
+                  className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
                 {errors.password && (
                   <p className="text-sm text-destructive">
@@ -272,19 +276,20 @@ export default function SignUp() {
                   </p>
                 )}
               </div>
-
+              {/* Confirm Password Input */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">
+                <Label htmlFor="confirmPassword" className="dark:text-gray-300">
                   {t("auth.confirmPassword")}
                 </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
                   {...register("confirmPassword", {
-                    required: "Please confirm your password",
+                    required: t("auth.validation.requiredConfirmPassword"), // Translated validation
                     validate: (value) =>
-                      value === password || "Passwords do not match",
+                      value === password || t("auth.validation.passwordMismatch"), // Translated validation
                   })}
+                  className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-destructive">
@@ -292,7 +297,7 @@ export default function SignUp() {
                   </p>
                 )}
               </div>
-
+              {/* Sign up as Owner Checkbox */}
               <div className="flex items-center space-x-2">
                 <Controller
                   name="isOwner"
@@ -307,15 +312,15 @@ export default function SignUp() {
                 />
                 <Label
                   htmlFor="isOwner"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer dark:text-gray-300"
                 >
-                  Sign up as an Owner
+                  {t("auth.label.isOwner")} {/* Translated */}
                 </Label>
               </div>
             </CardContent>
 
             <CardFooter>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full bg-[#ef4343] hover:bg-[#ff7e7e]" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -64,7 +64,7 @@ export default function MyListings() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch listings");
+        throw new Error(t("toast.deleteError.fetch")); // Translated error
       }
 
       const data = await response.json();
@@ -75,7 +75,7 @@ export default function MyListings() {
 
   const deleteMutation = useMutation({
     mutationFn: async (listingId: string) => {
-      if (!token) throw new Error("Not authenticated");
+      if (!token) throw new Error(t("common.notAuthenticated")); // Translated error
 
       const response = await fetch(`${LISTINGS_API_URL}/${listingId}/own`, {
         method: "DELETE",
@@ -85,19 +85,19 @@ export default function MyListings() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete listing");
+        throw new Error(t("toast.deleteError.delete")); // Translated error
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["myListings"] });
       toast({
-        title: "Success",
-        description: "Listing deleted successfully",
+        title: t("common.success"), // Translated
+        description: t("toast.deleteSuccess.desc"), // Translated
       });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("toast.error.title"), // Translated
         description: error.message,
         variant: "destructive",
       });
@@ -105,7 +105,7 @@ export default function MyListings() {
   });
 
   const renderPriceLevel = (level?: number) => {
-    if (!level || level === 0) return "N/A";
+    if (!level || level === 0) return t("common.na"); // Translated
     return "$".repeat(level);
   };
 
@@ -113,60 +113,66 @@ export default function MyListings() {
     <div className="flex min-h-screen flex-col">
       <Header />
 
-      <div className="flex-1 bg-muted/30">
+      <div className="flex-1 bg-muted/30 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
+          {/* Header Section */}
           <div className="mb-8 flex items-center justify-between">
             <div>
-              <h1 className="mb-2 text-3xl font-bold">
+              <h1 className="mb-2 text-3xl font-bold dark:text-white">
                 {t("owner.myListings")}
               </h1>
-              <p className="text-muted-foreground">
-                Manage your business listings
+              <p className="text-muted-foreground dark:text-gray-400">
+                {t("owner.subtitle")} {/* Translated */}
               </p>
             </div>
             <Link to="/owner/add-listing">
-              <Button>
+              <Button className="bg-[#ef4343] hover:bg-[#ff7e7e]">
                 <Plus className="mr-2 h-4 w-4" />
                 {t("owner.addNew")}
               </Button>
             </Link>
           </div>
 
-          <Card>
+          {/* Listings Card */}
+          <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle>Your Listings</CardTitle>
+              <CardTitle className="dark:text-white">
+                {t("owner.cardTitle")} {/* Translated */}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
                 <div className="flex justify-center py-8">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#ef4343] border-t-transparent"></div>
                 </div>
               ) : listings.length === 0 ? (
                 <div className="py-8 text-center text-muted-foreground">
-                  <p>You haven't created any listings yet.</p>
+                  <p className="dark:text-gray-400">
+                    {t("owner.noListings")} {/* Translated */}
+                  </p>
                   <Link to="/owner/add-listing">
-                    <Button className="mt-4">
+                    <Button className="mt-4 bg-[#ef4343] hover:bg-[#ff7e7e]">
                       <Plus className="mr-2 h-4 w-4" />
-                      Create Your First Listing
+                      {t("owner.createFirst")} {/* Translated */}
                     </Button>
                   </Link>
                 </div>
               ) : (
-                <Table>
+                <Table className="dark:text-white">
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Category</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Price Level</TableHead>
-                      <TableHead>Rating</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
+                    <TableRow className="dark:border-gray-700">
+                      <TableHead>{t("dashboard.table.name")}</TableHead>
+                      <TableHead>{t("table.head.category")}</TableHead> {/* Translated */}
+                      <TableHead>{t("table.head.location")}</TableHead> {/* Translated */}
+                      <TableHead>{t("table.head.priceLevel")}</TableHead> {/* Translated */}
+                      <TableHead>{t("table.head.rating")}</TableHead> {/* Translated */}
+                      <TableHead>{t("table.head.status")}</TableHead> {/* Translated */}
+                      <TableHead>{t("table.head.actions")}</TableHead> {/* Translated */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {listings.map((listing) => (
-                      <TableRow key={listing._id}>
+                      <TableRow key={listing._id} className="dark:border-gray-700">
                         <TableCell className="font-medium">
                           {listing.name}
                         </TableCell>
@@ -178,14 +184,14 @@ export default function MyListings() {
                         <TableCell>
                           {listing.ratingsAverage
                             ? `${listing.ratingsAverage} ★`
-                            : "N/A"}
+                            : t("common.na")}
                         </TableCell>
                         <TableCell>
                           <span
                             className={`inline-flex rounded-full px-2 py-1 text-xs capitalize ${
                               listing.status === "accepted"
-                                ? "bg-success/10 text-success"
-                                : "bg-muted text-muted-foreground"
+                                ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
+                                : "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
                             }`}
                           >
                             {listing.status}
@@ -193,35 +199,39 @@ export default function MyListings() {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
+                            {/* Edit Button */}
                             <Link to={`/owner/edit-listing/${listing._id}`}>
-                              <Button variant="ghost" size="sm">
+                              <Button variant="ghost" size="sm" className="dark:text-gray-300 hover:bg-gray-700">
                                 <Edit className="h-4 w-4" />
                               </Button>
                             </Link>
+                            {/* Delete Dialog Trigger */}
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="sm">
+                                <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10 dark:hover:bg-red-900/50">
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent className="dark:bg-gray-800 dark:border-gray-700">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Delete Listing
+                                  <AlertDialogTitle className="dark:text-white">
+                                    {t("dialog.delete.title")} {/* Translated */}
                                   </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this
-                                    listing? This action cannot be undone.
+                                  <AlertDialogDescription className="dark:text-gray-400">
+                                    {t("dialog.delete.desc")} {/* Translated */}
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel className="dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+                                    {t("common.cancel")}
+                                  </AlertDialogCancel>
                                   <AlertDialogAction
+                                    className="bg-destructive hover:bg-destructive/90"
                                     onClick={() =>
                                       deleteMutation.mutate(listing._id)
                                     }
                                   >
-                                    Delete
+                                    {t("common.delete")} {/* Translated */}
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
                               </AlertDialogContent>

@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
 import { User } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next"; // Import useTranslation
 
 const LISTINGS_API_URL = "http://127.0.0.1:5000/api/listings";
 const USERS_API_URL = "http://127.0.0.1:5000/api/users";
@@ -46,6 +47,7 @@ interface UsersResponse {
 
 export default function Dashboard() {
   const { token, isAdmin } = useAuth();
+  const { t } = useTranslation(); // Initialize translation hook
 
   const { data: listingsData, isLoading: isLoadingListings } =
     useQuery<ListingsResponse>({
@@ -57,7 +59,7 @@ export default function Dashboard() {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (!response.ok) throw new Error("Failed to fetch listings");
+        if (!response.ok) throw new Error(t("common.failedLoad"));
         return response.json();
       },
       enabled: !!token && !!isAdmin,
@@ -73,7 +75,7 @@ export default function Dashboard() {
             Authorization: `Bearer ${token}`,
           },
         });
-        if (!response.ok) throw new Error("Failed to fetch users");
+        if (!response.ok) throw new Error(t("common.failedLoad"));
         const users = await response.json();
         return { users: users, count: users.length };
       },
@@ -81,7 +83,7 @@ export default function Dashboard() {
     });
 
   const renderPriceLevel = (level?: number) => {
-    if (!level || level === 0) return "N/A";
+    if (!level || level === 0) return t("common.na");
     return "$".repeat(level);
   };
 
@@ -89,95 +91,101 @@ export default function Dashboard() {
     <div className="flex min-h-screen flex-col">
       <Header />
 
-      <div className="flex-1 bg-muted/30">
+      <div className="flex-1 bg-muted/30 dark:bg-gray-900">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Manage your listings and users
+            <h1 className="mb-2 text-3xl font-bold dark:text-white">
+              {t("dashboard.title")}
+            </h1>
+            <p className="text-muted-foreground dark:text-gray-400">
+              {t("dashboard.subtitle")}
             </p>
           </div>
 
           <div className="mb-8 grid gap-6 md:grid-cols-2">
-            <Card>
+            <Card className="dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Listings
+                <CardTitle className="text-sm font-medium dark:text-gray-300">
+                  {t("dashboard.card.totalListings")}
                 </CardTitle>
                 <MapPin className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold dark:text-white">
                   {isLoadingListings
-                    ? "..."
+                    ? t("common.loading") // Translated
                     : listingsData?.count ?? listingsData?.listings.length ?? 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Total listings in the database
+                <p className="text-xs text-muted-foreground dark:text-gray-400">
+                  {t("dashboard.card.totalListingsDesc")}
                 </p>
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="dark:bg-gray-800">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Users</CardTitle>
+                <CardTitle className="text-sm font-medium dark:text-gray-300">
+                  {t("dashboard.card.users")}
+                </CardTitle>
                 <Users className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">
+                <div className="text-2xl font-bold dark:text-white">
                   {isLoadingUsers
-                    ? "..."
+                    ? t("common.loading") // Translated
                     : usersData?.count ?? usersData?.users.length ?? 0}
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground dark:text-gray-400">
                   {isLoadingUsers
-                    ? "..."
+                    ? t("common.loading") // Translated
                     : usersData?.users?.filter((u) => u.role === "admin")
                         .length ?? 0}{" "}
-                  admins
+                  {t("dashboard.card.admins")}
                 </p>
               </CardContent>
             </Card>
           </div>
 
           <Tabs defaultValue="listings" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="listings">Listings</TabsTrigger>
-              <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsList className="dark:bg-gray-800">
+              <TabsTrigger value="listings">{t("dashboard.listings")}</TabsTrigger>
+              <TabsTrigger value="users">{t("dashboard.users")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="listings">
-              <Card>
+              <Card className="dark:bg-gray-800">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Listings Management</CardTitle>
-                  <Button>
+                  <CardTitle className="dark:text-white">
+                    {t("dashboard.management.listings")}
+                  </CardTitle>
+                  <Button className="bg-[#ef4343] hover:bg-[#ff7e7e]">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add Listing
+                    {t("dashboard.addListing")}
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <Table className="dark:text-white">
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Category</TableHead>
-                        <TableHead>Location</TableHead>
-                        <TableHead>PriceLevel</TableHead>
-                        <TableHead>Rating</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                      <TableRow className="dark:border-gray-700">
+                        <TableHead>{t("dashboard.table.name")}</TableHead>
+                        <TableHead>{t("dashboard.table.category")}</TableHead>
+                        <TableHead>{t("dashboard.table.location")}</TableHead>
+                        <TableHead>{t("dashboard.table.priceLevel")}</TableHead>
+                        <TableHead>{t("dashboard.table.rating")}</TableHead>
+                        <TableHead>{t("dashboard.table.status")}</TableHead>
+                        <TableHead>{t("dashboard.table.actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {isLoadingListings ? (
                         <TableRow>
                           <TableCell colSpan={7} className="text-center">
-                            Loading...
+                            {t("common.loading")}
                           </TableCell>
                         </TableRow>
                       ) : (
                         listingsData?.listings.map((listing) => (
-                          <TableRow key={listing._id}>
+                          <TableRow key={listing._id} className="dark:border-gray-700">
                             <TableCell className="font-medium">
                               {listing.name}
                             </TableCell>
@@ -189,7 +197,7 @@ export default function Dashboard() {
                             <TableCell>
                               {listing.ratingsAverage
                                 ? `${listing.ratingsAverage} ★`
-                                : "N/A"}
+                                : t("common.na")}
                             </TableCell>
                             <TableCell>
                               <Badge
@@ -205,7 +213,7 @@ export default function Dashboard() {
                             </TableCell>
                             <TableCell>
                               <Button variant="ghost" size="sm">
-                                Edit
+                                {t("common.edit")}
                               </Button>
                             </TableCell>
                           </TableRow>
@@ -218,34 +226,36 @@ export default function Dashboard() {
             </TabsContent>
 
             <TabsContent value="users">
-              <Card>
+              <Card className="dark:bg-gray-800">
                 <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>Users Management</CardTitle>
-                  <Button>
+                  <CardTitle className="dark:text-white">
+                    {t("dashboard.management.users")}
+                  </CardTitle>
+                  <Button className="bg-[#ef4343] hover:bg-[#ff7e7e]">
                     <Plus className="mr-2 h-4 w-4" />
-                    Add User
+                    {t("dashboard.management.addUser")}
                   </Button>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <Table className="dark:text-white">
                     <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Role</TableHead>
-                        <TableHead>Actions</TableHead>
+                      <TableRow className="dark:border-gray-700">
+                        <TableHead>{t("dashboard.table.name")}</TableHead>
+                        <TableHead>{t("dashboard.table.email")}</TableHead>
+                        <TableHead>{t("dashboard.table.role")}</TableHead>
+                        <TableHead>{t("dashboard.table.actions")}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {isLoadingUsers ? (
                         <TableRow>
                           <TableCell colSpan={4} className="text-center">
-                            Loading...
+                            {t("common.loading")}
                           </TableCell>
                         </TableRow>
                       ) : (
                         usersData?.users.map((user) => (
-                          <TableRow key={user._id}>
+                          <TableRow key={user._id} className="dark:border-gray-700">
                             <TableCell className="font-medium">
                               {user.name}
                             </TableCell>
@@ -264,7 +274,7 @@ export default function Dashboard() {
                             </TableCell>
                             <TableCell>
                               <Button variant="ghost" size="sm">
-                                Edit
+                                {t("common.edit")}
                               </Button>
                             </TableCell>
                           </TableRow>

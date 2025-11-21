@@ -38,12 +38,13 @@ interface HistoryItem {
 }
 
 export default function Profile() {
-  const { user, isAdmin, isOwner, token } = useAuth();
+  const { user, token } = useAuth();
   const { t } = useTranslation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
+  // --- Fetch Favorites ---
   const { data: favorites = [], isLoading: isLoadingFavorites } = useQuery<
     FavoritePlace[]
   >({
@@ -56,7 +57,7 @@ export default function Profile() {
       });
 
       if (!favListResponse.ok)
-        throw new Error("Failed to fetch favorites list");
+        throw new Error(t("toast.error.failedFav")); // Translated error
 
       const favListData = await favListResponse.json();
       return favListData.data;
@@ -64,16 +65,17 @@ export default function Profile() {
     enabled: !!token,
   });
 
+  // --- Delete Favorite Mutation ---
   const deleteFavoriteMutation = useMutation({
     mutationFn: async (placeId: string) => {
-      if (!token) throw new Error("Not authenticated");
+      if (!token) throw new Error(t("common.notAuthenticated")); // Translated error
       const response = await fetch(`${USERS_API_URL}/favorites/${placeId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
-        let errorMessage = "Failed to remove favorite";
+        let errorMessage = t("toast.error.failedFav"); // Translated error
         try {
           const errData = await response.json();
           if (errData.message) errorMessage = errData.message;
@@ -86,27 +88,31 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
       queryClient.invalidateQueries({ queryKey: ["me"] });
-      toast({ title: "Success", description: "Removed from favorites" });
+      toast({ 
+        title: t("common.success"), 
+        description: t("toast.favSuccess.removed") // Translated success
+      });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("toast.error.title"), // Translated
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
+  // --- Clear History Mutation ---
   const clearHistoryMutation = useMutation({
     mutationFn: async () => {
-      if (!token) throw new Error("Not authenticated");
+      if (!token) throw new Error(t("common.notAuthenticated")); // Translated error
       const response = await fetch(`${USERS_API_URL}/history`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) {
-        let errorMessage = "Failed to clear history";
+        let errorMessage = t("toast.error.failedHistory"); // Translated error
         try {
           const errData = await response.json();
           if (errData.message) errorMessage = errData.message;
@@ -118,11 +124,14 @@ export default function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
-      toast({ title: "Success", description: "History cleared" });
+      toast({ 
+        title: t("common.success"), 
+        description: t("toast.historySuccess.cleared") // Translated success
+      });
     },
     onError: (error: any) => {
       toast({
-        title: "Error",
+        title: t("toast.error.title"), // Translated
         description: error.message,
         variant: "destructive",
       });
@@ -138,7 +147,7 @@ export default function Profile() {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const fullName = user?.name || user?.email?.split("@")[0] || "User";
+  const fullName = user?.name || user?.email?.split("@")[0] || t("common.user"); // Added fallback translation
   const avatarUrl = user?.profilePicture;
   const userHistory: HistoryItem[] = user?.history || [];
 
@@ -239,16 +248,17 @@ export default function Profile() {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      Remove Favorite?
+                                      {t("dialog.favRemove.title")} {/* Translated */}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
-                                      Are you sure you want to remove "
-                                      {item.name}" from your favorites?
+                                      {t("dialog.favRemove.desc", {
+                                        placeName: item.name,
+                                      })} {/* Translated and interpolated */}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>
-                                      Cancel
+                                      {t("common.cancel")} {/* Translated */}
                                     </AlertDialogCancel>
                                     <AlertDialogAction
                                       className="bg-destructive hover:bg-destructive/90"
@@ -256,7 +266,7 @@ export default function Profile() {
                                         deleteFavoriteMutation.mutate(item._id)
                                       }
                                     >
-                                      Remove
+                                      {t("common.remove")} {/* Translated */}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -291,26 +301,27 @@ export default function Profile() {
                           disabled={clearHistoryMutation.isPending}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          Clear History
+                          {t("dialog.historyClear.button")} {/* Translated */}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            Clear All History?
+                            {t("dialog.historyClear.title")} {/* Translated */}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete your entire visited history.
+                            {t("dialog.historyClear.desc")} {/* Translated */}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogCancel>
+                            {t("common.cancel")} {/* Translated */}
+                          </AlertDialogCancel>
                           <AlertDialogAction
                             className="bg-destructive hover:bg-destructive/90"
                             onClick={() => clearHistoryMutation.mutate()}
                           >
-                            Yes, Clear History
+                            {t("dialog.historyClear.confirm")} {/* Translated */}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -340,7 +351,7 @@ export default function Profile() {
                             variant="outline"
                             onClick={() => navigate(`/listing/${item._id}`)}
                           >
-                            View
+                            {t("common.view")} {/* Translated */}
                           </Button>
                         </div>
                       </Card>
