@@ -44,6 +44,28 @@ exports.getAllListings = async (req, res) => {
   }
 };
 
+// Get a specific listing by ID (Admin)
+exports.getListingById = async (req, res) => {
+  try {
+    const listing = await Listing.findById(req.params.id)
+      .populate("place")
+      .populate("owner", "name email");
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
+    }
+
+    res.status(200).json({
+      message: "Success",
+      data: listing,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Failed to fetch listing", error: error.message });
+  }
+};
+
 // Update listing (admin)
 exports.updateListing = async (req, res) => {
   try {
@@ -154,19 +176,21 @@ exports.updateOwnListing = async (req, res) => {
     if (listing.status !== "accepted")
       return res
         .status(403)
-        .json({ message: "Listing must be accepted to edit" });
+        .json({ message: "Listing must be accepted to update" });
 
-    // Update place details
     const place = await Place.findByIdAndUpdate(listing.place, req.body, {
       new: true,
+      runValidators: true,
     });
 
-    // Set needsReview flag to true so admin knows
+    // Reset status to 'pending'
+    listing.status = "pending";
     listing.needsReview = true;
+
     await listing.save();
 
     res.status(200).json({
-      message: "Listing updated, pending admin review",
+      message: "Listing updated and moved to pending for admin review",
       listing,
       place,
     });

@@ -3,17 +3,18 @@ const router = express.Router();
 const listingController = require("../controllers/listingController");
 const { protect, restrictTo } = require("../middlewares/authMiddleware");
 
-// User routes (protected)
+// User Routes (Protected)
 router.use(protect);
 
 router.post("/submit", listingController.createListing);
+router.get("/my", listingController.getMyListings);
+
 router
   .route("/:id/own")
   .put(listingController.updateOwnListing)
   .delete(listingController.deleteOwnListing);
-router.get("/my", listingController.getMyListings);
 
-// Admin-only routes
+// Admin Routes (Restricted)
 router.use(restrictTo("admin"));
 
 router
@@ -23,9 +24,10 @@ router
 
 router
   .route("/:id")
-  .put(listingController.updateListing) // Update
+  .get(listingController.getListingById)
+  .put(listingController.updateListing)
   .delete(listingController.deleteListing);
 
-router.patch("/:id/status", listingController.updateListingStatus); // Approve / Reject
+router.patch("/:id/status", listingController.updateListingStatus);
 
 module.exports = router;

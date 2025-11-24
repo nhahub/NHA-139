@@ -10,12 +10,12 @@ exports.protect = async (req, res, next) => {
   }
 
   const token = req.headers.authorization.split(" ")[1];
-  console.log("🔹 Received Token:", token);
-  console.log("🔹 Secret Used:", process.env.JWT_SECRET);
+  // console.log("🔹 Received Token:", token);
+  // console.log("🔹 Secret Used:", process.env.JWT_SECRET);
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log("🔹 Decoded Payload:", decoded);
+    // console.log("🔹 Decoded Payload:", decoded);
 
     req.user = await User.findById(decoded.id);
     next();

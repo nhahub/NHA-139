@@ -6,7 +6,6 @@ router = express.Router();
 
 // router.get("/test-apify", placeController.testApifyConnection);
 // router.post("/fetch-apify", placeController.fetchPlacesFromApify);
-// router.get("/distribution", placeController.getPlacesDistribution);
 
 router.get("/search", protect, placeController.getFilteredPlaces);
 router.route("/:id").get(protect, placeController.getPlace);

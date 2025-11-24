@@ -17,6 +17,6 @@ const listingRoutes = require("./routes/listingRoutes");
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/v1/places", placeRoutes);
-app.use("/api/listing", listingRoutes);
+app.use("/api/listings", listingRoutes);
 
 module.exports = app;

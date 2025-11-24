@@ -18,6 +18,7 @@ import MyListings from "./pages/owner/MyListings";
 import AddListing from "./pages/owner/AddListing";
 import NotFound from "./pages/NotFound";
 import "./lib/i18n";
+import EditListing from "./pages/owner/EditListing";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,14 @@ const App = () => (
                 element={
                   <ProtectedRoute requireOwner>
                     <AddListing />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/owner/edit-listing/:id"
+                element={
+                  <ProtectedRoute requireOwner>
+                    <EditListing />
                   </ProtectedRoute>
                 }
               />

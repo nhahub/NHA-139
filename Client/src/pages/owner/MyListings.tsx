@@ -32,7 +32,7 @@ import {
 
 const LISTINGS_API_URL = "http://127.0.0.1:5000/api/listings";
 
-interface Listing {
+interface Place {
   _id: string;
   name: string;
   city: string;
@@ -43,7 +43,13 @@ interface Listing {
   ratingsQuantity?: number;
   address?: string;
   website?: string;
+}
+
+interface Listing {
+  _id: string;
+  place: Place;
   status: "pending" | "accepted" | "rejected";
+  adminNote?: string;
 }
 
 export default function MyListings() {
@@ -68,7 +74,7 @@ export default function MyListings() {
       }
 
       const data = await response.json();
-      return data.listings;
+      return data.data;
     },
     enabled: !!token,
   });
@@ -89,6 +95,7 @@ export default function MyListings() {
       }
     },
     onSuccess: () => {
+      // Dynamic updates
       queryClient.invalidateQueries({ queryKey: ["myListings"] });
       toast({
         title: "Success",
@@ -107,6 +114,19 @@ export default function MyListings() {
   const renderPriceLevel = (level?: number) => {
     if (!level || level === 0) return "N/A";
     return "$".repeat(level);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "accepted":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "rejected":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
   };
 
   return (
@@ -168,36 +188,38 @@ export default function MyListings() {
                     {listings.map((listing) => (
                       <TableRow key={listing._id}>
                         <TableCell className="font-medium">
-                          {listing.name}
-                        </TableCell>
-                        <TableCell>{listing.category.join(", ")}</TableCell>
-                        <TableCell>{listing.city}</TableCell>
-                        <TableCell>
-                          {renderPriceLevel(listing.priceLevel)}
+                          {listing.place?.name || "Unnamed Place"}
                         </TableCell>
                         <TableCell>
-                          {listing.ratingsAverage
-                            ? `${listing.ratingsAverage} ★`
+                          {listing.place?.category?.join(", ") || "N/A"}
+                        </TableCell>
+                        <TableCell>{listing.place?.city || "N/A"}</TableCell>
+                        <TableCell>
+                          {renderPriceLevel(listing.place?.priceLevel)}
+                        </TableCell>
+                        <TableCell>
+                          {listing.place?.ratingsAverage
+                            ? `${listing.place.ratingsAverage} ★`
                             : "N/A"}
                         </TableCell>
                         <TableCell>
                           <span
-                            className={`inline-flex rounded-full px-2 py-1 text-xs capitalize ${
-                              listing.status === "accepted"
-                                ? "bg-success/10 text-success"
-                                : "bg-muted text-muted-foreground"
-                            }`}
+                            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium border ${getStatusBadge(
+                              listing.status
+                            )}`}
                           >
                             {listing.status}
                           </span>
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Link to={`/owner/edit-listing/${listing._id}`}>
-                              <Button variant="ghost" size="sm">
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                            </Link>
+                            {listing.status === "accepted" && (
+                              <Link to={`/owner/edit-listing/${listing._id}`}>
+                                <Button variant="ghost" size="sm">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                              </Link>
+                            )}
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button variant="ghost" size="sm">
