@@ -66,6 +66,8 @@ export default function EditListing() {
 
         if (!listingData) throw new Error("Listing not found");
 
+        // Allow rejected listings to load so they can be edited.
+
         const place = listingData.place;
         setValue("name", place.name);
         setValue("city", place.city);
@@ -80,7 +82,7 @@ export default function EditListing() {
           description: error.message,
           variant: "destructive",
         });
-        navigate(user.role === "admin" ? "/dashboard" : "/owner/my-listings");
+        navigate(user.role === "admin" ? "/dashboard" : "/dashboard");
       } finally {
         setIsFetching(false);
       }
@@ -154,7 +156,6 @@ export default function EditListing() {
         throw new Error(result.message || "Failed to update listing");
       }
 
-      // Routing Logic:
       if (user?.role === "admin") {
         toast({
           title: "Updated",
@@ -163,8 +164,8 @@ export default function EditListing() {
         navigate("/dashboard");
       } else {
         toast({
-          title: "Submitted for Review",
-          description: "Your changes are pending admin approval.",
+          title: "Resubmitted",
+          description: "Your listing has been updated and is pending approval.",
         });
         navigate("/dashboard");
       }

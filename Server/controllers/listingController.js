@@ -110,24 +110,15 @@ exports.updateListingStatus = async (req, res) => {
     const listing = await Listing.findById(req.params.id);
     if (!listing) return res.status(404).json({ message: "Listing not found" });
 
-    // If rejected → delete the listing and its place
-    if (status === "rejected") {
-      await Place.findByIdAndDelete(listing.place);
-      await Listing.findByIdAndDelete(req.params.id);
-
-      return res.status(200).json({
-        message: "Listing rejected and deleted successfully",
-      });
-    }
-
-    // Otherwise → update normally
+    // Do NOT delete if rejected. Just update status.
     listing.status = status;
     listing.adminNote = adminNote || listing.adminNote;
     listing.needsReview = false;
+
     await listing.save();
 
     res.status(200).json({
-      message: "Listing status updated successfully",
+      message: `Listing ${status} successfully`,
       listing,
     });
   } catch (error) {
@@ -162,35 +153,37 @@ exports.createListing = async (req, res) => {
   }
 };
 
-// Update own listing (after approval)
+// // Update own listing (User) - Resets status to PENDING
 exports.updateOwnListing = async (req, res) => {
   try {
     const listing = await Listing.findById(req.params.id);
     if (!listing) return res.status(404).json({ message: "Listing not found" });
 
+    // Security: Check ownership
     if (listing.owner.toString() !== req.user._id.toString())
       return res
         .status(403)
         .json({ message: "You can only update your own listings" });
 
-    if (listing.status !== "accepted")
-      return res
-        .status(403)
-        .json({ message: "Listing must be accepted to update" });
+    // Allowed editing 'rejected' listings so they can be fixed
 
+    // Update Place details
     const place = await Place.findByIdAndUpdate(listing.place, req.body, {
       new: true,
       runValidators: true,
     });
 
-    // Reset status to 'pending'
+    // Reset status to 'pending' for re-approval
     listing.status = "pending";
     listing.needsReview = true;
+
+    // Clear old admin note so it doesn't look rejected anymore
+    listing.adminNote = "";
 
     await listing.save();
 
     res.status(200).json({
-      message: "Listing updated and moved to pending for admin review",
+      message: "Listing updated and resubmitted for approval",
       listing,
       place,
     });

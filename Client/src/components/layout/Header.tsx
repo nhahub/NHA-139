@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UserAvatar } from "@/components/UserAvatar";
-import { SignOutButton } from "@/components/SignOutButton"; // Assuming this component exists
+import { SignOutButton } from "@/components/SignOutButton";
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -16,24 +16,26 @@ export function Header() {
   const { user, isOwner } = useAuth();
   const { t } = useTranslation();
 
-  // 1. إعداد قائمة التنقل الأساسية
+  // Helper to determine if user has dashboard access
+  const canAccessDashboard = user?.role === "admin" || user?.role === "owner";
+
+  // 1. Navigation Menu Setup
   const navigation = [
     { name: t("nav.home"), href: "/" },
     { name: t("nav.listings"), href: "/listings" },
     { name: t("nav.contact"), href: "/contact" },
-    // إضافة رابط لوحة التحكم لجميع المستخدمين المسجلين (مالك/مسؤول/مستخدم عادي)
-    // لأن لوحة التحكم موحدة الآن
-    ...(user ? [{ name: t("nav.dashboard"), href: "/dashboard" }] : []),
+    // Only add Dashboard link if user is Admin or Owner
+    ...(canAccessDashboard
+      ? [{ name: t("nav.dashboard"), href: "/dashboard" }]
+      : []),
   ];
 
-  // 2. تحديد اسم المستخدم للعرض في قائمة الموبايل
   const displayName =
     user?.name || user?.email?.split("@")[0] || t("common.user");
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:bg-gray-900/90 dark:border-gray-700">
       <nav className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
         <Link
           to="/"
           className="flex items-center space-x-2 rtl:space-x-reverse"
@@ -44,7 +46,6 @@ export function Header() {
           <span className="text-xl font-bold dark:text-white">WhereToGo</span>
         </Link>
 
-        {/* Desktop Navigation */}
         <div className="hidden md:flex md:items-center md:space-x-8 rtl:space-x-reverse rtl:md:space-x-reverse rtl:md:space-x-8">
           {navigation.map((item) => (
             <Link
@@ -54,7 +55,8 @@ export function Header() {
                 "text-sm font-medium transition-colors hover:text-[#ef4343] dark:hover:text-[#ff7e7e]",
                 location.pathname === item.href ||
                   (item.href === "/dashboard" &&
-                    location.pathname.startsWith("/owner"))
+                    (location.pathname.startsWith("/owner") ||
+                      location.pathname.startsWith("/admin")))
                   ? "text-[#ef4343] dark:text-[#ff7e7e]"
                   : "text-foreground/60 dark:text-gray-400"
               )}
@@ -64,7 +66,6 @@ export function Header() {
           ))}
         </div>
 
-        {/* Desktop Controls (Right) */}
         <div className="hidden md:flex md:items-center md:space-x-2 rtl:space-x-reverse">
           <LanguageSwitcher />
           <ThemeToggle />
@@ -72,7 +73,7 @@ export function Header() {
           {user ? (
             <>
               {/* Add New Listing Button (Owner/Admin Only) */}
-              {isOwner && (
+              {(isOwner || user.role === "admin") && (
                 <Link to="/owner/add-listing">
                   <Button size="sm" className="bg-[#ef4343] hover:bg-[#ff7e7e]">
                     <Plus className="mr-2 h-4 w-4 rtl:ml-2 rtl:mr-0" />
@@ -80,7 +81,6 @@ export function Header() {
                   </Button>
                 </Link>
               )}
-              {/* User Avatar and Sign Out */}
               <UserAvatar user={user} />
               <SignOutButton />
             </>
@@ -134,7 +134,8 @@ export function Header() {
                   "block rounded-md px-3 py-2 text-base font-medium transition-colors",
                   location.pathname === item.href ||
                     (item.href === "/dashboard" &&
-                      location.pathname.startsWith("/admin"))
+                      (location.pathname.startsWith("/admin") ||
+                        location.pathname.startsWith("/owner")))
                     ? "bg-[#ef4343] text-white"
                     : "text-foreground/80 hover:bg-muted dark:text-gray-300 dark:hover:bg-gray-800"
                 )}
@@ -166,13 +167,12 @@ export function Header() {
                           {user.email}
                         </p>
                       </div>
-                      {/* Sign out button inside the info card */}
                       <SignOutButton />
                     </div>
                   </div>
 
-                  {/* Owner Button (if owner) */}
-                  {isOwner && (
+                  {/* Owner/Admin Button (if applicable) */}
+                  {(isOwner || user.role === "admin") && (
                     <Link to="/owner/add-listing">
                       <Button
                         className="w-full bg-[#ef4343] hover:bg-[#ff7e7e]"
@@ -185,7 +185,7 @@ export function Header() {
                   )}
                 </>
               ) : (
-                /* Mobile Auth Buttons (Sign In / Sign Up) */
+                /* Mobile Auth Buttons */
                 <>
                   <Link to="/signin">
                     <Button
