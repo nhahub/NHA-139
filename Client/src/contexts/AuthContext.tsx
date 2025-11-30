@@ -8,8 +8,9 @@ import {
 } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-const AUTH_API_URL = "http://127.0.0.1:5000/api/auth";
-const USERS_API_URL = "http://127.0.0.1:5000/api/users";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const AUTH_API_URL = API_BASE_URL + "/api/auth";
+const USERS_API_URL = API_BASE_URL + "/api/users";
 
 export interface User {
   [x: string]: any;

@@ -14,7 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const LISTINGS_API_URL = "http://127.0.0.1:5000/api/listings";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const LISTINGS_API_URL = API_BASE_URL + "/api/listings";
 
 interface AddListingFormData {
   place: string;
@@ -91,16 +92,20 @@ export default function AddListing() {
         <div className="container mx-auto px-4 py-8">
           {/* Header Section */}
           <div className="mb-8">
-            <h1 className="mb-2 text-3xl font-bold dark:text-white">{t("owner.addNew")}</h1>
+            <h1 className="mb-2 text-3xl font-bold dark:text-white">
+              {t("owner.addNew")}
+            </h1>
             <p className="text-muted-foreground dark:text-gray-400">
-              {t("owner.addListingSubtitle")}  
+              {t("owner.addListingSubtitle")}
             </p>
           </div>
 
           {/* Form Card */}
           <Card className="dark:bg-gray-800 dark:border-gray-700">
             <CardHeader>
-              <CardTitle className="dark:text-white">{t("owner.form.cardTitle")}</CardTitle>
+              <CardTitle className="dark:text-white">
+                {t("owner.form.cardTitle")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -132,7 +137,9 @@ export default function AddListing() {
                   <Input
                     id="title"
                     placeholder={t("owner.form.placeholder.title")}
-                    {...register("title", { required: t("owner.validation.requiredTitle") })}
+                    {...register("title", {
+                      required: t("owner.validation.requiredTitle"),
+                    })}
                     className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                   />
                   {errors.title && (
@@ -165,7 +172,11 @@ export default function AddListing() {
 
                 {/* Buttons */}
                 <div className="flex gap-4">
-                  <Button type="submit" disabled={isLoading} className="bg-[#ef4343] hover:bg-[#ff7e7e]">
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-[#ef4343] hover:bg-[#ff7e7e]"
+                  >
                     {isLoading ? t("common.loading") : t("common.submit")}
                   </Button>
                   <Button

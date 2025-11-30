@@ -15,7 +15,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 
-const LISTINGS_API_URL = "http://127.0.0.1:5000/api/listings";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const LISTINGS_API_URL = API_BASE_URL + "/api/listings";
 
 interface AddListingFormData {
   name: string;

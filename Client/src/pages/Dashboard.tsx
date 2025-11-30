@@ -62,8 +62,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useTranslation } from "react-i18next";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const LISTINGS_API_URL = "http://127.0.0.1:5000/api/listings";
-const USERS_API_URL = "http://127.0.0.1:5000/api/users";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const LISTINGS_API_URL = API_BASE_URL + "/api/listings";
+const USERS_API_URL = API_BASE_URL + "/api/users";
 
 interface Place {
   _id: string;

@@ -25,7 +25,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import img from "../assets/Cardimg.png";
 
-const USERS_API_URL = "http://127.0.0.1:5000/api/users";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const USERS_API_URL = API_BASE_URL + "/api/users";
 
 interface FavoritePlace {
   _id: string;
@@ -56,8 +57,7 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!favListResponse.ok)
-        throw new Error(t("toast.error.failedFav")); // Translated error
+      if (!favListResponse.ok) throw new Error(t("toast.error.failedFav")); // Translated error
 
       const favListData = await favListResponse.json();
       return favListData.data;
@@ -88,9 +88,9 @@ export default function Profile() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
       queryClient.invalidateQueries({ queryKey: ["me"] });
-      toast({ 
-        title: t("common.success"), 
-        description: t("toast.favSuccess.removed") // Translated success
+      toast({
+        title: t("common.success"),
+        description: t("toast.favSuccess.removed"), // Translated success
       });
     },
     onError: (error: any) => {
@@ -124,9 +124,9 @@ export default function Profile() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["me"] });
-      toast({ 
-        title: t("common.success"), 
-        description: t("toast.historySuccess.cleared") // Translated success
+      toast({
+        title: t("common.success"),
+        description: t("toast.historySuccess.cleared"), // Translated success
       });
     },
     onError: (error: any) => {
@@ -248,17 +248,18 @@ export default function Profile() {
                                 <AlertDialogContent>
                                   <AlertDialogHeader>
                                     <AlertDialogTitle>
-                                      {t("dialog.favRemove.title")}  
+                                      {t("dialog.favRemove.title")}
                                     </AlertDialogTitle>
                                     <AlertDialogDescription>
                                       {t("dialog.favRemove.desc", {
                                         placeName: item.name,
-                                      })} {/* Translated and interpolated */}
+                                      })}{" "}
+                                      {/* Translated and interpolated */}
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
                                   <AlertDialogFooter>
                                     <AlertDialogCancel>
-                                      {t("common.cancel")}  
+                                      {t("common.cancel")}
                                     </AlertDialogCancel>
                                     <AlertDialogAction
                                       className="bg-destructive hover:bg-destructive/90"
@@ -266,7 +267,7 @@ export default function Profile() {
                                         deleteFavoriteMutation.mutate(item._id)
                                       }
                                     >
-                                      {t("common.remove")}  
+                                      {t("common.remove")}
                                     </AlertDialogAction>
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
@@ -301,27 +302,27 @@ export default function Profile() {
                           disabled={clearHistoryMutation.isPending}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          {t("dialog.historyClear.button")}  
+                          {t("dialog.historyClear.button")}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            {t("dialog.historyClear.title")}  
+                            {t("dialog.historyClear.title")}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            {t("dialog.historyClear.desc")}  
+                            {t("dialog.historyClear.desc")}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>
-                            {t("common.cancel")}  
+                            {t("common.cancel")}
                           </AlertDialogCancel>
                           <AlertDialogAction
                             className="bg-destructive hover:bg-destructive/90"
                             onClick={() => clearHistoryMutation.mutate()}
                           >
-                            {t("dialog.historyClear.confirm")}  
+                            {t("dialog.historyClear.confirm")}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
@@ -351,7 +352,7 @@ export default function Profile() {
                             variant="outline"
                             onClick={() => navigate(`/listing/${item._id}`)}
                           >
-                            {t("common.view")}  
+                            {t("common.view")}
                           </Button>
                         </div>
                       </Card>

@@ -1,11 +1,18 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const mongoSanitize = require("express-mongo-sanitize");
 
 // Middlewares
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(mongoSanitize());
+app.use(
+  cors({
+    origin: ["https://where-to-go.vercel.app", "http://localhost:8080/"],
+    credentials: true,
+  })
+);
 app.use(morgan("dev"));
 
 // Routes
@@ -16,7 +23,7 @@ const listingRoutes = require("./routes/listingRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/v1/places", placeRoutes);
+app.use("/api/places", placeRoutes);
 app.use("/api/listings", listingRoutes);
 
 module.exports = app;

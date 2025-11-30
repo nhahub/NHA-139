@@ -21,7 +21,7 @@ import img from "../assets/Cardimg.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 interface Location {
   type: string;
@@ -44,7 +44,9 @@ interface Restaurant {
   updatedAt?: string;
 }
 
-const USERS_API_URL = "http://127.0.0.1:5000/api/users";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const USERS_API_URL = API_BASE_URL + "/api/users";
+const PLACES_API_URL = API_BASE_URL + "/api/places";
 
 const ListingDetails: React.FC = () => {
   const { t } = useTranslation();
@@ -70,21 +72,18 @@ const ListingDetails: React.FC = () => {
       setError(null);
 
       try {
-        const response = await axios.get(
-          `http://127.0.0.1:5000/api/v1/places/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, //
-            },
-          }
-        );
+        const response = await axios.get(`${PLACES_API_URL}/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`, //
+          },
+        });
 
         // Response format: { message: "success", data: { place: {...} } }
         setRestaurant(response.data.data.place);
         setLoading(false);
       } catch (err) {
         console.error("Error fetching restaurant:", err);
-        setError(t('listing.errorLoad'));
+        setError(t("listing.errorLoad"));
         setLoading(false);
       }
     };
@@ -93,7 +92,7 @@ const ListingDetails: React.FC = () => {
       fetchRestaurant();
     } else if (!token) {
       setLoading(false);
-      setError(t('listing.loginRequired'));
+      setError(t("listing.loginRequired"));
     }
   }, [id, token, t]);
 
@@ -112,7 +111,7 @@ const ListingDetails: React.FC = () => {
       placeId: string;
       isCurrentlyFavorite: boolean;
     }) => {
-      if (!token) throw new Error(t('listing.loginRequired'));
+      if (!token) throw new Error(t("listing.loginRequired"));
 
       const url = `${USERS_API_URL}/favorites${
         isCurrentlyFavorite ? `/${placeId}` : ""
@@ -134,7 +133,7 @@ const ListingDetails: React.FC = () => {
       const response = await fetch(url, options);
       if (!response.ok) {
         const err = await response.json();
-        throw new Error(err.message || t('listing.errorFavorite'));
+        throw new Error(err.message || t("listing.errorFavorite"));
       }
     },
     onSuccess: (data, variables) => {
@@ -146,15 +145,15 @@ const ListingDetails: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ["profileFavorites"] });
 
       toast({
-        title: t('listing.success'),
+        title: t("listing.success"),
         description: isCurrentlyFavorite
-          ? t('listing.removedFavorite')
-          : t('listing.addedFavorite'),
+          ? t("listing.removedFavorite")
+          : t("listing.addedFavorite"),
       });
     },
     onError: (error: any) => {
       toast({
-        title: t('listing.error'),
+        title: t("listing.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -165,8 +164,8 @@ const ListingDetails: React.FC = () => {
     if (!id) return;
     if (!token) {
       toast({
-        title: t('listing.loginRequired'),
-        description: t('listing.loginToFavorite'),
+        title: t("listing.loginRequired"),
+        description: t("listing.loginToFavorite"),
         variant: "destructive",
       });
       return;
@@ -189,7 +188,7 @@ const ListingDetails: React.FC = () => {
   };
 
   const renderPriceLevel = (level?: number) => {
-    if (!level) return t('listing.nA');
+    if (!level) return t("listing.nA");
     return "£".repeat(level) + "£".repeat(4 - level).replace(/£/g, "·");
   };
 
@@ -201,7 +200,7 @@ const ListingDetails: React.FC = () => {
           <div className="flex flex-col items-center gap-4">
             <Loader2 className="h-12 w-12 text-[#ef4343] animate-spin" />
             <p className="text-gray-600 dark:text-gray-400">
-              {t('listing.loading')}
+              {t("listing.loading")}
             </p>
           </div>
         </div>
@@ -218,13 +217,13 @@ const ListingDetails: React.FC = () => {
           <div className="max-w-2xl mx-auto text-center">
             <div className="bg-red-50 border border-red-200 rounded-lg p-8">
               <p className="text-red-600 text-lg mb-4">
-                {error || t('listing.notFound')}
+                {error || t("listing.notFound")}
               </p>
               <Button
                 onClick={goBack}
                 className="bg-[#ef4343] hover:bg-[#ff7e7e] text-white"
               >
-                {t('listing.backToListings')}
+                {t("listing.backToListings")}
               </Button>
             </div>
           </div>
@@ -245,7 +244,7 @@ const ListingDetails: React.FC = () => {
           className="flex items-center gap-2 hover:bg-[#ff7e7e] dark:hover:bg-[#ff7e7e]"
         >
           <ArrowLeft className="h-4 w-4" />
-          {t('listing.backToListings')}
+          {t("listing.backToListings")}
         </Button>
       </div>
 
@@ -280,7 +279,7 @@ const ListingDetails: React.FC = () => {
 
               <div className="absolute top-4 left-4">
                 <span className="px-4 py-2 bg-[#ef4343] text-white text-sm font-semibold rounded-full shadow-lg">
-                  {restaurant.category?.[0] || t('listing.restaurant')}
+                  {restaurant.category?.[0] || t("listing.restaurant")}
                 </span>
               </div>
             </div>
@@ -301,7 +300,7 @@ const ListingDetails: React.FC = () => {
                 </div>
                 <span className="text-gray-600 dark:text-gray-400">
                   {restaurant.ratingsQuantity?.toLocaleString() || 0}{" "}
-                  {t('listing.reviews')}
+                  {t("listing.reviews")}
                 </span>
                 <span className="text-[#ef4343] dark:text-[#ef4343] text-lg">
                   <span className="text-gray-500">£:</span>
@@ -319,10 +318,14 @@ const ListingDetails: React.FC = () => {
               <CardContent className="p-6">
                 <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                   <span className="text-[#ef4343]">●</span>
-                  {t('listing.about')}
+                  {t("listing.about")}
                 </h2>
                 <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-lg">
-                  {t('listing.aboutText', { name: restaurant.name, city: restaurant.city, category: restaurant.category?.[0] || '' })}
+                  {t("listing.aboutText", {
+                    name: restaurant.name,
+                    city: restaurant.city,
+                    category: restaurant.category?.[0] || "",
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -332,7 +335,7 @@ const ListingDetails: React.FC = () => {
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
                     <span className="text-[#ef4343]">●</span>
-                    {t('listing.categories')}
+                    {t("listing.categories")}
                   </h2>
                   <div className="flex flex-wrap gap-2">
                     {restaurant.category.map((cat, index) => (
@@ -353,7 +356,7 @@ const ListingDetails: React.FC = () => {
             <Card className="sticky top-6 shadow-xl border-2 border-gray-200 dark:border-gray-700">
               <CardContent className="p-6 space-y-6">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white border-b-2 border-[#ef4343] pb-3">
-                  {t('listing.contactInfo')}
+                  {t("listing.contactInfo")}
                 </h2>
 
                 {restaurant.address && (
@@ -375,7 +378,7 @@ const ListingDetails: React.FC = () => {
                             className="mt-3 w-full text-[#ef4343] border-[#ef4343] hover:bg-[#ef4343] hover:text-white"
                           >
                             <Navigation className="h-4 w-4 mr-2" />
-                            {t('listing.openInMaps')}
+                            {t("listing.openInMaps")}
                           </Button>
                         )}
                       </div>
@@ -384,39 +387,38 @@ const ListingDetails: React.FC = () => {
                 )}
 
                 <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
-                 <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
-    {/* الحاوية الرئيسية - نستخدم 'flex' ونثبت الأيقونة في أقصى اليمين في وضع RTL */}
-    <div className="flex items-start gap-3">
-        
-        {/* أيقونة الهاتف - تثبيت الأيقونة في موقعها */}
-        <Phone 
-            className="h-5 w-5 text-[#ef4343] mt-1 flex-shrink-0" 
-            // نستخدم فئات RTL لتغيير الهامش (margin) لتبتعد عن النص
-            style={{ marginInlineEnd: '0.75rem' }} 
-        />
-        
-        {/* حاوية النص - تشغل المساحة المتبقية وتكون محاذية لليمين في RTL */}
-        <div className="flex-1 rtl:text-right">
-            <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                {t('listing.phone')}
-            </p>
-            {restaurant.phone ? (
-                <a
-                    href={`tel:${restaurant.phone}`}
-                    className="text-[#ef4343] hover:underline font-medium block"
-                    // نستخدم CSS لتثبيت اتجاه الأرقام من LTR للقراءة الصحيحة
-                    style={{ direction: 'ltr' }} 
-                >
-                    {restaurant.phone}
-                </a>
-            ) : (
-                <p className="text-gray-500 dark:text-gray-400 italic">
-                    {t('listing.phoneComingSoon')}
-                </p>
-            )}
-        </div>
-    </div>
-</div>
+                  <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    {/* الحاوية الرئيسية - نستخدم 'flex' ونثبت الأيقونة في أقصى اليمين في وضع RTL */}
+                    <div className="flex items-start gap-3">
+                      {/* أيقونة الهاتف - تثبيت الأيقونة في موقعها */}
+                      <Phone
+                        className="h-5 w-5 text-[#ef4343] mt-1 flex-shrink-0"
+                        // نستخدم فئات RTL لتغيير الهامش (margin) لتبتعد عن النص
+                        style={{ marginInlineEnd: "0.75rem" }}
+                      />
+
+                      {/* حاوية النص - تشغل المساحة المتبقية وتكون محاذية لليمين في RTL */}
+                      <div className="flex-1 rtl:text-right">
+                        <p className="font-semibold text-gray-900 dark:text-white mb-1">
+                          {t("listing.phone")}
+                        </p>
+                        {restaurant.phone ? (
+                          <a
+                            href={`tel:${restaurant.phone}`}
+                            className="text-[#ef4343] hover:underline font-medium block"
+                            // نستخدم CSS لتثبيت اتجاه الأرقام من LTR للقراءة الصحيحة
+                            style={{ direction: "ltr" }}
+                          >
+                            {restaurant.phone}
+                          </a>
+                        ) : (
+                          <p className="text-gray-500 dark:text-gray-400 italic">
+                            {t("listing.phoneComingSoon")}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -424,7 +426,7 @@ const ListingDetails: React.FC = () => {
                     <Globe className="h-5 w-5 text-[#ef4343] mt-1 flex-shrink-0" />
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                        {t('listing.website')}
+                        {t("listing.website")}
                       </p>
                       {restaurant.website ? (
                         <a
@@ -433,11 +435,11 @@ const ListingDetails: React.FC = () => {
                           rel="noopener noreferrer"
                           className="text-[#ef4343] hover:underline font-medium break-all text-sm"
                         >
-                          {t('listing.visitWebsite')}
+                          {t("listing.visitWebsite")}
                         </a>
                       ) : (
                         <p className="text-gray-500 dark:text-gray-400 italic">
-                          {t('listing.notAvailable')}
+                          {t("listing.notAvailable")}
                         </p>
                       )}
                     </div>
@@ -449,16 +451,16 @@ const ListingDetails: React.FC = () => {
                     <span className="text-[#ef4343] text-xl mt-0.5">£</span>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900 dark:text-white mb-1">
-                        {t('listing.priceLevel')}
+                        {t("listing.priceLevel")}
                       </p>
                       <div className="text-2xl font-bold text-[#ef4343]">
                         {restaurant.priceLevel}
                       </div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {restaurant.priceLevel === 1 && t('listing.budget')}
-                        {restaurant.priceLevel === 2 && t('listing.moderate')}
-                        {restaurant.priceLevel === 3 && t('listing.upscale')}
-                        {restaurant.priceLevel === 4 && t('listing.fineDining')}
+                        {restaurant.priceLevel === 1 && t("listing.budget")}
+                        {restaurant.priceLevel === 2 && t("listing.moderate")}
+                        {restaurant.priceLevel === 3 && t("listing.upscale")}
+                        {restaurant.priceLevel === 4 && t("listing.fineDining")}
                       </p>
                     </div>
                   </div>
@@ -474,10 +476,10 @@ const ListingDetails: React.FC = () => {
                   {restaurant.phone ? (
                     <>
                       <Phone className="h-5 w-5 mr-2" />
-                      {t('listing.callNow')}
+                      {t("listing.callNow")}
                     </>
                   ) : (
-                    t('listing.phoneComingSoon')
+                    t("listing.phoneComingSoon")
                   )}
                 </Button>
               </CardContent>

@@ -22,6 +22,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2, X, Upload } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+const AUTH_API_URL = API_BASE_URL + "/api/auth";
+
 interface SignUpFormData {
   fullName: string;
   email: string;
@@ -119,7 +122,7 @@ export default function SignUp() {
         formData.append("avatar", profilePicture);
       }
 
-      const response = await fetch("http://127.0.0.1:5000/api/auth/signup", {
+      const response = await fetch(`${AUTH_API_URL}/signup`, {
         method: "POST",
         body: formData,
       });
@@ -197,7 +200,9 @@ export default function SignUp() {
                     htmlFor="profilePicture"
                     className="cursor-pointer text-[#ef4343] hover:text-[#ff7e7e] hover:underline text-sm font-medium transition-colors"
                   >
-                    {profilePreview ? t("upload.changePhoto") : t("upload.uploadPhoto")}
+                    {profilePreview
+                      ? t("upload.changePhoto")
+                      : t("upload.uploadPhoto")}
                   </Label>
                   <Input
                     id="profilePicture"
@@ -214,7 +219,9 @@ export default function SignUp() {
               </div>
               {/* Full Name Input */}
               <div className="space-y-2">
-                <Label htmlFor="fullName" className="dark:text-gray-300">{t("auth.fullName")}</Label>
+                <Label htmlFor="fullName" className="dark:text-gray-300">
+                  {t("auth.fullName")}
+                </Label>
                 <Input
                   id="fullName"
                   placeholder="John Doe"
@@ -235,7 +242,9 @@ export default function SignUp() {
               </div>
               {/* Email Input */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="dark:text-gray-300">{t("auth.email")}</Label>
+                <Label htmlFor="email" className="dark:text-gray-300">
+                  {t("auth.email")}
+                </Label>
                 <Input
                   id="email"
                   type="email"
@@ -257,7 +266,9 @@ export default function SignUp() {
               </div>
               {/* Password Input */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="dark:text-gray-300">{t("auth.password")}</Label>
+                <Label htmlFor="password" className="dark:text-gray-300">
+                  {t("auth.password")}
+                </Label>
                 <Input
                   id="password"
                   type="password"
@@ -287,7 +298,8 @@ export default function SignUp() {
                   {...register("confirmPassword", {
                     required: t("auth.validation.requiredConfirmPassword"), // Translated validation
                     validate: (value) =>
-                      value === password || t("auth.validation.passwordMismatch"), // Translated validation
+                      value === password ||
+                      t("auth.validation.passwordMismatch"), // Translated validation
                   })}
                   className="dark:bg-gray-900 dark:border-gray-600 dark:text-white"
                 />
@@ -314,13 +326,17 @@ export default function SignUp() {
                   htmlFor="isOwner"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer dark:text-gray-300"
                 >
-                  {t("auth.label.isOwner")}  
+                  {t("auth.label.isOwner")}
                 </Label>
               </div>
             </CardContent>
 
             <CardFooter>
-              <Button type="submit" className="w-full bg-[#ef4343] hover:bg-[#ff7e7e]" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full bg-[#ef4343] hover:bg-[#ff7e7e]"
+                disabled={isLoading}
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

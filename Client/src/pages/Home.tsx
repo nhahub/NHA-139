@@ -14,10 +14,10 @@ import axios from "axios";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import heroimg from "../assets/hero-bg.jpg";
-import { useTranslation } from 'react-i18next'; // <-- Import i18n
+import { useTranslation } from "react-i18next"; // <-- Import i18n
 
 // API Configuration
-const API_BASE_URL = "http://127.0.0.1:5000/api/v1";
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -232,18 +232,10 @@ const Home: React.FC = () => {
                       className="w-full pl-10 pr-10 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:outline-none appearance-none bg-white cursor-pointer transition-colors dark:text-black"
                     >
                       <option value="">{t("search.allPrices")}</option>
-                      <option value="1">
-                        $ - {t("search.budget")}
-                      </option>
-                      <option value="2">
-                        $$ - {t("search.moderate")}
-                      </option>
-                      <option value="3">
-                        $$$ - {t("search.expensive")}
-                      </option>
-                      <option value="4">
-                        $$$$ - {t("search.luxury")}
-                      </option>
+                      <option value="1">$ - {t("search.budget")}</option>
+                      <option value="2">$$ - {t("search.moderate")}</option>
+                      <option value="3">$$$ - {t("search.expensive")}</option>
+                      <option value="4">$$$$ - {t("search.luxury")}</option>
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                       <svg
@@ -287,7 +279,9 @@ const Home: React.FC = () => {
                         {t("search.summaryInCity", { city: selectedCity })}
                       </span>
                     )}
-                    {selectedCity && selectedPrice && t("search.summaryWith", " with")}
+                    {selectedCity &&
+                      selectedPrice &&
+                      t("search.summaryWith", " with")}
                     {selectedPrice && (
                       <span className="font-semibold text-green-600 dark:text-green-400">
                         {" "}
@@ -394,7 +388,10 @@ const Home: React.FC = () => {
                       {t("stats.citiesAvailable", "Cities Available")}
                     </div>
                     <p className="text-sm text-gray-500 text-center dark:text-gray-300">
-                      {t("stats.exploreDestinations", "Explore destinations worldwide")}
+                      {t(
+                        "stats.exploreDestinations",
+                        "Explore destinations worldwide"
+                      )}
                     </p>
                   </div>
                 </div>
@@ -430,7 +427,10 @@ const Home: React.FC = () => {
                       {t("stats.amazingPlaces", "Amazing Places")}
                     </div>
                     <p className="text-sm text-gray-500 text-center dark:text-gray-300">
-                      {t("stats.curatedExperiences", "Curated experiences await")}
+                      {t(
+                        "stats.curatedExperiences",
+                        "Curated experiences await"
+                      )}
                     </p>
                   </div>
                 </div>
