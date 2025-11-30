@@ -95,13 +95,16 @@ export default function AddListing() {
       // 1. Prepare Coordinates
       let coordinates: [number, number] = [30.0, 31.0]; // افتراضي
 
+      // Ensure data.googleMapsLink exists (Validation guarantees this, but logic remains for safety)
       if (data.googleMapsLink) {
         const extracted = extractCoordinatesFromGoogleMaps(data.googleMapsLink);
         if (extracted) {
           coordinates = extracted;
         } else {
           // إذا كان الرابط موجودًا لكن الاستخلاص فشل بشكل مطلق
-          throw new Error(t("owner.validation.invalidMapLink"));
+          throw new Error(
+            t("owner.validation.invalidMapLink", "Invalid Google Maps link")
+          );
         }
       }
 
@@ -217,7 +220,10 @@ export default function AddListing() {
                       placeholder={t("owner.form.placeholder.placeName")}
                       className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       {...register("name", {
-                        required: t("owner.validation.requiredName", "Name is required"),
+                        required: t(
+                          "owner.validation.requiredName",
+                          "Name is required"
+                        ),
                       })}
                     />
                     {errors.name && (
@@ -239,7 +245,10 @@ export default function AddListing() {
                       id="city"
                       className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       {...register("city", {
-                        required: t("owner.validation.requiredCity", "City is required"),
+                        required: t(
+                          "owner.validation.requiredCity",
+                          "City is required"
+                        ),
                       })}
                     />
                     {errors.city && (
@@ -263,7 +272,10 @@ export default function AddListing() {
                     placeholder={t("owner.form.placeholder.address")}
                     className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     {...register("address", {
-                      required: t("owner.validation.requiredAddress", "Address is required"),
+                      required: t(
+                        "owner.validation.requiredAddress",
+                        "Address is required"
+                      ),
                     })}
                   />
                   {errors.address && (
@@ -273,28 +285,47 @@ export default function AddListing() {
                   )}
                 </div>
 
-                {/* Google Maps Link */}
+                {/* Google Maps Link (Mandatory) */}
                 <div className="space-y-2">
-  <Label
-    htmlFor="googleMapsLink"
-    className="rtl:text-right block dark:text-gray-300"
-  >
-    {t("owner.form.label.mapsLink")}
-  </Label>
+                  <Label
+                    htmlFor="googleMapsLink"
+                    className="rtl:text-right block dark:text-gray-300"
+                  >
+                    {t(
+                      "owner.form.label.mapsLink.addListing",
+                      "Google Maps Link *"
+                    )}
+                  </Label>
 
-  <Input
-    id="googleMapsLink"
-    type="url"
-    className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-    placeholder={t("owner.form.placeholder.maps", "Paste new Google Maps link to change location...")}
-    {...register("googleMapsLink")}
-  />
+                  <Input
+                    id="googleMapsLink"
+                    type="url"
+                    className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                    placeholder={t(
+                      "owner.form.placeholder.maps.addListing",
+                      "Paste Google Maps link..."
+                    )}
+                    {...register("googleMapsLink", {
+                      required: t(
+                        "owner.validation.requiredMapLink",
+                        "Google Maps link is required"
+                      ),
+                    })}
+                  />
 
-  <p className="text-xs text-muted-foreground dark:text-gray-400 rtl:text-right">
-    {t("owner.form.mapsLinkHint","You can find this link by sharing the location from Google Maps.", )}
-  </p>
-</div>
+                  <p className="text-xs text-muted-foreground dark:text-gray-400 rtl:text-right">
+                    {t(
+                      "owner.form.mapsLinkHint",
+                      "You can find this link by sharing the location from Google Maps."
+                    )}
+                  </p>
 
+                  {errors.googleMapsLink && (
+                    <p className="text-sm text-destructive rtl:text-right">
+                      {errors.googleMapsLink.message}
+                    </p>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Category */}
@@ -310,7 +341,10 @@ export default function AddListing() {
                       placeholder={t("owner.form.placeholder.category")}
                       className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       {...register("category", {
-                        required: t("owner.validation.requiredCategory", "Category is required"),
+                        required: t(
+                          "owner.validation.requiredCategory",
+                          "Category is required"
+                        ),
                       })}
                     />
                     {errors.category && (
@@ -335,15 +369,18 @@ export default function AddListing() {
                       max="4"
                       className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       {...register("priceLevel", {
-                        required: t("owner.validation.requiredPriceLevel", "Price Level is required"),
+                        required: t(
+                          "owner.validation.requiredPriceLevel",
+                          "Price Level is required"
+                        ),
                         valueAsNumber: true,
                         min: {
                           value: 1,
-                          message: t("owner.validation.priceLevelMin","Min 1"),
+                          message: t("owner.validation.priceLevelMin", "Min 1"),
                         },
                         max: {
                           value: 4,
-                          message: t("owner.validation.priceLevelMax","Max 4"),
+                          message: t("owner.validation.priceLevelMax", "Max 4"),
                         },
                       })}
                     />
@@ -364,7 +401,10 @@ export default function AddListing() {
                     </Label>
                     <Input
                       id="phone"
-                      placeholder={t("owner.form.placeholder.phone", "Enter phone number")}
+                      placeholder={t(
+                        "owner.form.placeholder.phone",
+                        "Enter phone number"
+                      )}
                       className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                       {...register("phone")}
                     />
@@ -382,7 +422,10 @@ export default function AddListing() {
                   <Input
                     id="website"
                     type="url"
-                    placeholder={t("owner.form.placeholder.website", "Enter website URL")}
+                    placeholder={t(
+                      "owner.form.placeholder.website",
+                      "Enter website URL"
+                    )}
                     className="rtl:text-right dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     {...register("website")}
                   />

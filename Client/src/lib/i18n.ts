@@ -1,10 +1,10 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 
 // Translation files
 const resources = {
-  "en": {
-    "translation": {
+  en: {
+    translation: {
       "nav.home": "Home",
       "nav.listings": "Listings",
       "nav.contact": "Contact",
@@ -15,25 +15,31 @@ const resources = {
       "nav.profile": "Profile",
       "nav.favorites": "Favorites",
       "nav.myListings": "My Listings",
-      
+
       // --- Home ---
       "home.hero.title": "Discover Amazing Places",
-      "home.hero.subtitle": "Find the best restaurants, cafes, and services in your area",
+      "home.hero.subtitle":
+        "Find the best restaurants, cafes, and services in your area",
       "home.categories.title": "Browse by Category",
       "home.featured.title": "Featured Listings",
       "home.features.title": "Why Choose Us?",
-      "home.features.subtitle": "We provide the best experience for finding your next favorite place.",
+      "home.features.subtitle":
+        "We provide the best experience for finding your next favorite place.",
       "home.features.feature1.title": "Wide Selection",
-      "home.features.feature1.desc": "Discover thousands of unique places curated just for you.",
+      "home.features.feature1.desc":
+        "Discover thousands of unique places curated just for you.",
       "home.features.feature2.title": "Best Value",
-      "home.features.feature2.desc": "Find options for every budget, from budget-friendly to luxury.",
+      "home.features.feature2.desc":
+        "Find options for every budget, from budget-friendly to luxury.",
       "home.features.feature3.title": "Trusted Reviews",
-      "home.features.feature3.desc": "Read honest reviews and ratings from our community of explorers.",
+      "home.features.feature3.desc":
+        "Read honest reviews and ratings from our community of explorers.",
       "home.stats.title": "Our Success in Numbers",
-      "home.stats.subtitle": "The metrics that reflect our commitment to the community.",
+      "home.stats.subtitle":
+        "The metrics that reflect our commitment to the community.",
       "stats.amazingPlaces": "Amazing Places",
       "stats.support": "Support",
-      "stats.hereWhenNeed":"We're here whenever you need",
+      "stats.hereWhenNeed": "We're here whenever you need",
       "stats.curatedExperiences": "Curated experiences await",
       "stats.priceLevels": "Price Levels",
       "stats.optionsForBudget": "Options for every budget",
@@ -69,7 +75,7 @@ const resources = {
       "filter.unit.km": "km",
       "filter.clear": "Clear",
       "filter.apply": "Apply Filters",
-      
+
       // --- Listings Data & Table ---
       "listing.rating": "Rating",
       "listing.reviews": "reviews",
@@ -88,43 +94,49 @@ const resources = {
       "listing.status.featured": "Featured",
       "listing.locationDisplay": "{{city}}, {{state}}",
       "listing.ratingDisplay": "({{reviewCount}})",
-      "allListings": "All Listings",
-      "showingAllResults": "Showing All results",
-      "filteredResults": "Showing Filtered Results",
-      "clearFilters": "Clear Filters",
-      "clearAllFilters": "Clear All Filters",
-      "loadingPlaces": "Loading places...",
-      "noPlaces": "No Places Found",
-      "noPlacesFiltered": "We couldn't find any places matching your filters. Try adjusting your search criteria.",
-      "noPlacesAvailable": "No places are currently available.",
-      "loadMore": "Load More",
-      "remaining": "remaining",
+      allListings: "All Listings",
+      showingAllResults: "Showing All results",
+      filteredResults: "Showing Filtered Results",
+      clearFilters: "Clear Filters",
+      clearAllFilters: "Clear All Filters",
+      loadingPlaces: "Loading places...",
+      noPlaces: "No Places Found",
+      noPlacesFiltered:
+        "We couldn't find any places matching your filters. Try adjusting your search criteria.",
+      noPlacesAvailable: "No places are currently available.",
+      loadMore: "Load More",
+      remaining: "remaining",
       "table.head.category": "Category",
       "table.head.location": "Location",
       "table.head.priceLevel": "Price Level",
       "table.head.rating": "Rating",
       "table.head.status": "Status",
       "table.head.actions": "Actions",
-      "owner.validation.requiredMapLink":"valid Google Maps link is required",
+      "owner.validation.requiredMapLink": "valid Google Maps link is required",
       "owner.validation.requiredName": "Name is required",
       ///////////////////////////////////
       "listing.contactInfo": "Contact Information",
       "listing.address": "Address",
       "listing.phone": "Phone",
-      'listing.phoneComingSoon': "Coming Soon!",
-      'listing.website': "Website",
-      'listing.notAvailable': "N/A",
-      'listing.budget': "Budget",
-      'listing.moderate': "Moderate",
-      'listing.upscale':" Upscale",
-      'listing.fineDining': "Fine Dining",
-      'listing.callNow': "Call Now",
-      'listing.openInMaps': "Open in Maps",
-      'listing.about': "About this place",
+      "listing.phoneComingSoon": "Coming Soon!",
+      "listing.website": "Website",
+      "listing.notAvailable": "N/A",
+      "listing.budget": "Budget",
+      "listing.moderate": "Moderate",
+      "listing.upscale": " Upscale",
+      "listing.fineDining": "Fine Dining",
+      "listing.callNow": "Call Now",
+      "listing.openInMaps": "Open in Maps",
+      "listing.about": "About this place",
       "listing.categories": "Categories",
-      "listing.aboutText": "Discover {{name}} in {{city}}, which is categorized as {{category}}." ,
-      'listing.backToListings': "Back to Listings",
-      'listing.restaurant': "Restaurant",
+      "listing.aboutText":
+        "Discover {{name}} in {{city}}, which is categorized as {{category}}.",
+      "listing.backToListings": "Back to Listings",
+      "listing.restaurant": "Restaurant",
+      "listing.success": "Success",
+      "listing.addedFavorite": "Added to favorites",
+      "listing.removedFavorite": "Removed from favorites",
+
       // --- Category ---
       "category.countDisplay": "({{count}})",
 
@@ -144,7 +156,8 @@ const resources = {
       "auth.validation.requiredEmail": "Email is required",
       "auth.validation.invalidEmail": "Invalid email address",
       "auth.validation.requiredPassword": "Password is required",
-      "auth.validation.passwordMinLength": "Password must be at least 6 characters",
+      "auth.validation.passwordMinLength":
+        "Password must be at least 6 characters",
       "auth.validation.requiredFullName": "Full name is required",
       "auth.validation.fullNameMinLength": "Name must be at least 2 characters",
       "auth.validation.requiredConfirmPassword": "Please confirm your password",
@@ -187,20 +200,22 @@ const resources = {
       "dashboard.unknown": "Unknown",
       "dashboard.rejectionReason": "Reason",
       "dashboard.deleteListingTitle": "Delete Listing",
-      "dashboard.deleteListingDesc": "Are you sure? This action cannot be undone.",
-      "dashboard.status.pending":"Pending",
-      "dashboard.status.accepted":"Accepted",
-      "dashboard.status.rejected":"Rejected",
+      "dashboard.deleteListingDesc":
+        "Are you sure? This action cannot be undone.",
+      "dashboard.status.pending": "Pending",
+      "dashboard.status.accepted": "Accepted",
+      "dashboard.status.rejected": "Rejected",
       "dashboard.usersTitle": "All System Users",
       "dashboard.noUsers": "No users found.",
       "dashboard.deleteUserTitle": "Delete User",
-      "dashboard.deleteUserDesc": "Are you sure you want to delete {{name}}? All associated data will be lost.",
+      "dashboard.deleteUserDesc":
+        "Are you sure you want to delete {{name}}? All associated data will be lost.",
       "dashboard.user.deleteFailed": "Failed to delete user",
       "dashboard.user.deleteSuccess": "User deleted successfully",
       "dashboard.user.edit": "Edit",
 
       // --- User Roles (NEW) ---
-      "roles.user": "User", 
+      "roles.user": "User",
       "roles.owner": "Owner",
       "roles.admin": "Admin",
 
@@ -216,22 +231,24 @@ const resources = {
       "addUser.form.role": "User Role",
       "addUser.form.selectRole": "Select a role",
       "addUser.form.addButton": "Add User",
-      
+
       // --- Edit User (NEW) ---
       "editUser.title": "Edit User: {{name}}",
       "editUser.subtitle": "Update user details and permissions",
-      "editUser.selfRoleWarning": "You cannot change the role of your own admin account.",
+      "editUser.selfRoleWarning":
+        "You cannot change the role of your own admin account.",
       "editUser.form.name": "Full Name",
       "editUser.form.namePlaceholder": "Enter new name",
       "editUser.form.email": "Email Address (Cannot be changed)",
-      "editUser.form.emailHint": "Email cannot be modified from this interface.",
+      "editUser.form.emailHint":
+        "Email cannot be modified from this interface.",
       "editUser.form.role": "User Role",
       "editUser.form.selectRole": "Select a new role",
       "toast.editError.user": "Failed to update user data.",
       "toast.editSuccess.user": "User data updated successfully.",
       "toast.addError.user": "Failed to create user.",
       "toast.addSuccess.user": "User created successfully.",
-      
+
       // --- Owner ---
       "owner.myListings": "My Listings",
       "owner.addNew": "Add New Listing",
@@ -244,7 +261,8 @@ const resources = {
       "owner.addListingSubtitle": "Submit a new listing for an existing place",
       "owner.form.cardTitle": "Listing Details",
       "owner.form.label.placeId": "Place ID *",
-      "owner.form.placeholder.placeId": "Enter the ID of the place (e.g., 68f97dbb91ccb7f1c2bc6bd0)",
+      "owner.form.placeholder.placeId":
+        "Enter the ID of the place (e.g., 68f97dbb91ccb7f1c2bc6bd0)",
       "owner.form.label.title": "Title *",
       "owner.form.placeholder.title": "e.g., Saqqara Training Opportunity",
       "owner.form.label.description": "Description *",
@@ -263,8 +281,11 @@ const resources = {
       "owner.form.label.priceLevel": "Price Level (1-4) *",
       "owner.form.label.phone": "Phone",
       "owner.form.label.website": "Website",
+      "owner.form.label.mapsLink.addListing": "Google Maps Link *",
+      "owner.form.placeholder.maps.addListing": "Paste Google Maps link...",
       "owner.form.label.mapsLink": "Update Location (Optional)",
-      "owner.form.placeholder.maps": "Paste new Google Maps link to change location...",
+      "owner.form.placeholder.maps":
+        "Paste new Google Maps link to change location...",
       "owner.validation.priceLevelMin": "Min 1",
       "owner.validation.priceLevelMax": "Max 4",
       "owner.validation.invalidMapLink": "Invalid Google Maps link format.",
@@ -279,8 +300,9 @@ const resources = {
       "owner.form.placeholder.website": "e.g., https://example.com",
       "owner.form.submitAdmin": "Save Changes",
       "owner.form.submitOwner": "Submit for Review",
-      "owner.form.mapsLinkHint": "You can find this link by sharing the location from Google Maps.", 
-      
+      "owner.form.mapsLinkHint":
+        "You can find this link by sharing the location from Google Maps.",
+
       // --- Contact ---
       "contact.title": "Contact Us",
       "contact.subtitle": "Get in touch with us",
@@ -288,7 +310,8 @@ const resources = {
       "contact.message": "Message",
       "contact.send": "Send Message",
       "contact.header.title": "Get In Touch",
-      "contact.header.subtitle": "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
+      "contact.header.subtitle":
+        "Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.",
       "contact.card.addressTitle": "Office Address",
       "contact.card.callTitle": "Call Us",
       "contact.card.emailTitle": "Email Address",
@@ -307,7 +330,7 @@ const resources = {
       "contact.form.validation.invalidEmail": "Invalid email address",
       "contact.form.validation.requiredSubject": "Subject is required",
       "contact.form.validation.requiredMessage": "Message is required",
-      
+
       // --- Common ---
       "common.loading": "Loading...",
       "common.save": "Save",
@@ -342,8 +365,9 @@ const resources = {
       "profile.noHistory": "No visited places yet",
       "profile.visited": "Visited",
       "profile.manageFavorites": "Manage your favorite places",
-      "profile.startSaving": "Start exploring and save your favorite places here",
-      
+      "profile.startSaving":
+        "Start exploring and save your favorite places here",
+
       // --- Not Found ---
       "notFound.title": "Oops! Page not found",
       "notFound.returnHome": "Return to Home",
@@ -351,14 +375,17 @@ const resources = {
 
       // --- Dialogs ---
       "dialog.favRemove.title": "Remove Favorite?",
-      "dialog.favRemove.desc": "Are you sure you want to remove \"{{placeName}}\" from your favorites?",
+      "dialog.favRemove.desc":
+        'Are you sure you want to remove "{{placeName}}" from your favorites?',
       "dialog.historyClear.button": "Clear History",
       "dialog.historyClear.title": "Clear All History?",
-      "dialog.historyClear.desc": "This action cannot be undone. This will permanently delete your entire visited history.",
+      "dialog.historyClear.desc":
+        "This action cannot be undone. This will permanently delete your entire visited history.",
       "dialog.historyClear.confirm": "Yes, Clear History",
       "dialog.delete.title": "Delete Listing",
-      "dialog.delete.desc": "Are you sure you want to delete this listing? This action cannot be undone.",
-      
+      "dialog.delete.desc":
+        "Are you sure you want to delete this listing? This action cannot be undone.",
+
       // --- Upload ---
       "upload.changePhoto": "Change Photo",
       "upload.uploadPhoto": "Upload Photo",
@@ -372,13 +399,15 @@ const resources = {
       "toast.historySuccess.cleared": "History cleared",
       "toast.signInSuccess.title": "Success",
       "toast.signInSuccess.desc": "Signed in successfully",
-      "toast.signUpSuccess.desc": "Account created successfully! You can now sign in.",
+      "toast.signUpSuccess.desc":
+        "Account created successfully! You can now sign in.",
       "toast.error.title": "Error",
       "toast.error.location": "Could not get your location for sorting.",
       "toast.error.failedUpdate": "Failed to update favorite",
       "toast.error.failedFav": "Failed to remove favorite",
       "toast.error.failedHistory": "Failed to clear history",
-      "toast.contactSuccess": "Message sent successfully! We'll get back to you soon.",
+      "toast.contactSuccess":
+        "Message sent successfully! We'll get back to you soon.",
       "toast.uploadError.invalidImage": "Please select a valid image file",
       "toast.uploadError.size": "Image size must be less than 5MB",
       "toast.error.signUpFailed": "Signup failed",
@@ -386,9 +415,11 @@ const resources = {
       "toast.deleteSuccess.desc": "Listing deleted successfully",
       "toast.deleteError.fetch": "Failed to fetch listings",
       "toast.deleteError.delete": "Failed to delete listing",
-      "toast.addListingError.login": "You must be logged in to submit a listing.",
+      "toast.addListingError.login":
+        "You must be logged in to submit a listing.",
       "toast.addListingError.failed": "Failed to create listing",
-      "toast.addListingSuccess.desc": "Listing submitted successfully. It is now pending review.",
+      "toast.addListingSuccess.desc":
+        "Listing submitted successfully. It is now pending review.",
       "toast.fetchError.listing": "Failed to fetch listing",
       "toast.fetchError.notFound": "Listing not found",
       "toast.update.title.failed": "Update Failed",
@@ -403,9 +434,10 @@ const resources = {
       // "toast.editSuccess.user": "User data updated successfully.",
       // "toast.addError.user": "Failed to create user.",
       // "toast.addSuccess.user": "User created successfully.",
-      
+
       // --- Footer ---
-      "footer.slogan": "Discover and connect with great places around the world. Your ultimate directory for local businesses.",
+      "footer.slogan":
+        "Discover and connect with great places around the world. Your ultimate directory for local businesses.",
       "footer.quickLinksTitle": "Quick Links",
       "footer.browseListings": "Browse Listings",
       "footer.aboutUs": "About Us",
@@ -424,11 +456,11 @@ const resources = {
 
       // --- Map ---
       "map.placeholder": "Map integration placeholder",
-      "map.config": "Configure with your Mapbox or Leaflet API key"
-    }
+      "map.config": "Configure with your Mapbox or Leaflet API key",
+    },
   },
-  "ar": {
-    "translation": {
+  ar: {
+    translation: {
       "nav.home": "الرئيسية",
       "nav.listings": "القوائم",
       "nav.contact": "اتصل بنا",
@@ -439,25 +471,29 @@ const resources = {
       "nav.profile": "الملف الشخصي",
       "nav.favorites": "المفضلة",
       "nav.myListings": "قوائمي",
-      
+
       // --- Home ---
       "home.hero.title": "اكتشف أماكن مذهلة",
       "home.hero.subtitle": "اعثر على أفضل المطاعم والمقاهي والخدمات في منطقتك",
       "home.categories.title": "تصفح حسب الفئة",
       "home.featured.title": "القوائم المميزة",
       "home.features.title": "لماذا تختارنا؟",
-      "home.features.subtitle": "نقدم أفضل تجربة للعثور على مكانك المفضل التالي.",
+      "home.features.subtitle":
+        "نقدم أفضل تجربة للعثور على مكانك المفضل التالي.",
       "home.features.feature1.title": "مجموعة واسعة",
-      "home.features.feature1.desc": "اكتشف الآلاف من الأماكن الفريدة المنسقة خصيصًا لك.",
+      "home.features.feature1.desc":
+        "اكتشف الآلاف من الأماكن الفريدة المنسقة خصيصًا لك.",
       "home.features.feature2.title": "أفضل قيمة",
-      "home.features.feature2.desc": "اعثر على خيارات لكل ميزانية، من الاقتصادي إلى الفاخر.",
+      "home.features.feature2.desc":
+        "اعثر على خيارات لكل ميزانية، من الاقتصادي إلى الفاخر.",
       "home.features.feature3.title": "تقييمات موثوقة",
-      "home.features.feature3.desc": "اقرأ التقييمات والآراء الصادقة من مجتمع المستكشفين لدينا.",
+      "home.features.feature3.desc":
+        "اقرأ التقييمات والآراء الصادقة من مجتمع المستكشفين لدينا.",
       "home.stats.title": "نجاحنا بالأرقام",
       "home.stats.subtitle": "المقاييس التي تعكس التزامنا تجاه المجتمع.",
       "stats.amazingPlaces": "اماكن مذهلة",
       "stats.support": "الدعم",
-      "stats.hereWhenNeed":"نحن هنا متى ما احتجت",
+      "stats.hereWhenNeed": "نحن هنا متى ما احتجت",
       "stats.curatedExperiences": "تجارب منسقة في انتظارك",
       "stats.priceLevels": "مستويات الأسعار",
       "stats.optionsForBudget": "خيارات لكل ميزانية",
@@ -516,42 +552,47 @@ const resources = {
       "listing.status.featured": "مميز",
       "listing.locationDisplay": "{{city}}، {{state}}",
       "listing.ratingDisplay": "({{reviewCount}})",
-      "allListings": "كل الأماكن",
-      "showingAllResults": "عرض كل النتائج",
-      "filteredResults": "عرض النتائج المفلترة",
-      "clearFilters": "إزالة الفلاتر",
-      "clearAllFilters": "إزالة جميع الفلاتر",
-      "loadingPlaces": "جاري تحميل الأماكن...",
-      "noPlaces": "لا توجد أماكن",
-      "noPlacesFiltered": "لم نجد أي أماكن تطابق الفلاتر المختارة. حاول تعديل معايير البحث.",
-      "noPlacesAvailable": "لا توجد أماكن متاحة حالياً.",
-      "loadMore": "عرض المزيد",
-      "remaining": "متبقية",
+      allListings: "كل الأماكن",
+      showingAllResults: "عرض كل النتائج",
+      filteredResults: "عرض النتائج المفلترة",
+      clearFilters: "إزالة الفلاتر",
+      clearAllFilters: "إزالة جميع الفلاتر",
+      loadingPlaces: "جاري تحميل الأماكن...",
+      noPlaces: "لا توجد أماكن",
+      noPlacesFiltered:
+        "لم نجد أي أماكن تطابق الفلاتر المختارة. حاول تعديل معايير البحث.",
+      noPlacesAvailable: "لا توجد أماكن متاحة حالياً.",
+      loadMore: "عرض المزيد",
+      remaining: "متبقية",
       "table.head.category": "الفئة",
       "table.head.location": "الموقع",
       "table.head.priceLevel": "مستوى السعر",
       "table.head.rating": "التقييم",
       "table.head.status": "الحالة",
       "table.head.actions": "الإجراءات",
-"owner.validation.requiredMapLink": "رابط الموقع مطلوب",
-"owner.validation.requiredName": "الاسم مطلوب",
-"listing.contactInfo": "معلومات الاتصال",
+      "owner.validation.requiredMapLink": "رابط الموقع مطلوب",
+      "owner.validation.requiredName": "الاسم مطلوب",
+      "listing.contactInfo": "معلومات الاتصال",
       "listing.address": "العنوان",
       "listing.phone": "الهاتف",
-      'listing.phoneComingSoon': "قريباً!",
-      'listing.website': "الموقع الإلكتروني",
-      'listing.notAvailable': "غير متوفر",
-      'listing.budget': "اقتصادي",
-      'listing.moderate': "متوسط",
-      'listing.upscale':" راقي",
-      'listing.fineDining': "مطعم فاخر",
-      'listing.callNow': "اتصل الآن",
-      'listing.openInMaps': "افتح في الخرائط",
-      'listing.about': "حول هذا المكان",
+      "listing.phoneComingSoon": "قريباً!",
+      "listing.website": "الموقع الإلكتروني",
+      "listing.notAvailable": "غير متوفر",
+      "listing.budget": "اقتصادي",
+      "listing.moderate": "متوسط",
+      "listing.upscale": " راقي",
+      "listing.fineDining": "مطعم فاخر",
+      "listing.callNow": "اتصل الآن",
+      "listing.openInMaps": "افتح في الخرائط",
+      "listing.about": "حول هذا المكان",
       "listing.categories": "الفئة",
-      'listing.aboutText':"اكتشف {{name}} في مدينة {{city}}، المصنف ك  {{category}}.",
-      'listing.backToListings': "العودة إلى القوائم",
-      'listing.restaurant': "مطعم",
+      "listing.aboutText":
+        "اكتشف {{name}} في مدينة {{city}}، المصنف ك  {{category}}.",
+      "listing.backToListings": "العودة إلى القوائم",
+      "listing.restaurant": "مطعم",
+      "listing.success": "تم بنجاح",
+      "listing.addedFavorite": "تمت الإضافة للمفضلة",
+      "listing.removedFavorite": "تم الحذف من المفضلة",
       // --- Category ---
       "category.countDisplay": "({{count}})",
 
@@ -571,13 +612,15 @@ const resources = {
       "auth.validation.requiredEmail": "البريد الإلكتروني مطلوب",
       "auth.validation.invalidEmail": "عنوان بريد إلكتروني غير صالح",
       "auth.validation.requiredPassword": "كلمة المرور مطلوبة",
-      "auth.validation.passwordMinLength": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+      "auth.validation.passwordMinLength":
+        "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
       "auth.validation.requiredFullName": "الاسم الكامل مطلوب",
-      "auth.validation.fullNameMinLength": "يجب أن يتكون الاسم من حرفين على الأقل",
+      "auth.validation.fullNameMinLength":
+        "يجب أن يتكون الاسم من حرفين على الأقل",
       "auth.validation.requiredConfirmPassword": "يرجى تأكيد كلمة المرور",
       "auth.validation.passwordMismatch": "كلمات المرور غير متطابقة",
       "auth.label.isOwner": "التسجيل كصاحب مكان",
-      
+
       // --- Dashboard ---
       "dashboard.title": "لوحة التحكم",
       "dashboard.overview": "نظرة عامة",
@@ -614,18 +657,20 @@ const resources = {
       "dashboard.unknown": "غير معروف",
       "dashboard.rejectionReason": "السبب",
       "dashboard.deleteListingTitle": "حذف القائمة",
-      "dashboard.deleteListingDesc": "هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.",
-      "dashboard.status.pending":"قيد الانتظار",
-      "dashboard.status.accepted":"مقبول",
-      "dashboard.status.rejected":"مرفوض",
+      "dashboard.deleteListingDesc":
+        "هل أنت متأكد؟ لا يمكن التراجع عن هذا الإجراء.",
+      "dashboard.status.pending": "قيد الانتظار",
+      "dashboard.status.accepted": "مقبول",
+      "dashboard.status.rejected": "مرفوض",
       "dashboard.usersTitle": "جميع مستخدمي النظام",
       "dashboard.noUsers": "لم يتم العثور على مستخدمين.",
       "dashboard.deleteUserTitle": "حذف المستخدم",
-      "dashboard.deleteUserDesc": "هل أنت متأكد من أنك تريد حذف {{name}}؟ سيتم فقدان جميع البيانات المرتبطة.",
+      "dashboard.deleteUserDesc":
+        "هل أنت متأكد من أنك تريد حذف {{name}}؟ سيتم فقدان جميع البيانات المرتبطة.",
       "dashboard.user.deleteFailed": "فشل حذف المستخدم.",
       "dashboard.user.deleteSuccess": "تم حذف المستخدم بنجاح.",
       "dashboard.user.edit": "تعديل",
-      
+
       // --- Owner ---
       "owner.myListings": "قوائمي",
       "owner.addNew": "إضافة قائمة جديدة",
@@ -638,7 +683,8 @@ const resources = {
       "owner.addListingSubtitle": "أرسل قائمة جديدة لمكان موجود",
       "owner.form.cardTitle": "تفاصيل القائمة",
       "owner.form.label.placeId": "معرف المكان *",
-      "owner.form.placeholder.placeId": "أدخل معرف المكان (مثال: 68f97dbb91ccb7f1c2bc6bd0)",
+      "owner.form.placeholder.placeId":
+        "أدخل معرف المكان (مثال: 68f97dbb91ccb7f1c2bc6bd0)",
       "owner.form.label.title": "العنوان *",
       "owner.form.placeholder.title": "مثال: فرصة تدريب في سقارة",
       "owner.form.label.description": "الوصف *",
@@ -658,7 +704,8 @@ const resources = {
       "owner.form.label.phone": "الهاتف",
       "owner.form.label.website": "الموقع الإلكتروني",
       "owner.form.label.mapsLink": "تحديث الموقع (اختياري)",
-      "owner.form.placeholder.maps": "الصق رابط خرائط جوجل الجديد لتغيير الموقع...",
+      "owner.form.placeholder.maps":
+        "الصق رابط خرائط جوجل الجديد لتغيير الموقع...",
       "owner.validation.priceLevelMin": "الحد الأدنى 1",
       "owner.validation.priceLevelMax": "الحد الأقصى 4",
       "owner.validation.invalidMapLink": "تنسيق رابط خرائط جوجل غير صالح.",
@@ -673,7 +720,8 @@ const resources = {
       "owner.form.placeholder.website": "مثال: https://example.com",
       "owner.form.submitAdmin": "حفظ التغييرات",
       "owner.form.submitOwner": "إرسال للمراجعة",
-      "owner.form.mapsLinkHint": "يمكنك العثور على هذا الرابط بمشاركة الموقع من خرائط جوجل.",
+      "owner.form.mapsLinkHint":
+        "يمكنك العثور على هذا الرابط بمشاركة الموقع من خرائط جوجل.",
 
       // --- Contact ---
       "contact.title": "اتصل بنا",
@@ -682,7 +730,8 @@ const resources = {
       "contact.message": "الرسالة",
       "contact.send": "إرسال الرسالة",
       "contact.header.title": "تواصل معنا",
-      "contact.header.subtitle": "هل لديك أسئلة؟ نود أن نسمع منك. أرسل لنا رسالة وسنرد عليك في أقرب وقت ممكن.",
+      "contact.header.subtitle":
+        "هل لديك أسئلة؟ نود أن نسمع منك. أرسل لنا رسالة وسنرد عليك في أقرب وقت ممكن.",
       "contact.card.addressTitle": "عنوان المكتب",
       "contact.card.callTitle": "اتصل بنا",
       "contact.card.emailTitle": "البريد الإلكتروني",
@@ -737,7 +786,7 @@ const resources = {
       "profile.visited": "تمت الزيارة",
       "profile.manageFavorites": "إدارة الأماكن المفضلة لديك",
       "profile.startSaving": "ابدأ الاستكشاف واحفظ أماكنك المفضلة هنا",
-      
+
       // --- Not Found ---
       "notFound.title": "عذرًا! الصفحة غير موجودة",
       "notFound.returnHome": "العودة إلى الصفحة الرئيسية",
@@ -745,14 +794,17 @@ const resources = {
 
       // --- Dialogs ---
       "dialog.favRemove.title": "إزالة المفضلة؟",
-      "dialog.favRemove.desc": "هل أنت متأكد من أنك تريد إزالة \"{{placeName}}\" من مفضلاتك؟",
+      "dialog.favRemove.desc":
+        'هل أنت متأكد من أنك تريد إزالة "{{placeName}}" من مفضلاتك؟',
       "dialog.historyClear.button": "مسح السجل",
       "dialog.historyClear.title": "مسح السجل بالكامل؟",
-      "dialog.historyClear.desc": "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف سجل زياراتك بالكامل بشكل دائم.",
+      "dialog.historyClear.desc":
+        "لا يمكن التراجع عن هذا الإجراء. سيؤدي هذا إلى حذف سجل زياراتك بالكامل بشكل دائم.",
       "dialog.historyClear.confirm": "نعم، مسح السجل",
       "dialog.delete.title": "حذف القائمة",
-      "dialog.delete.desc": "هل أنت متأكد من أنك تريد حذف هذه القائمة؟ لا يمكن التراجع عن هذا الإجراء.",
-      
+      "dialog.delete.desc":
+        "هل أنت متأكد من أنك تريد حذف هذه القائمة؟ لا يمكن التراجع عن هذا الإجراء.",
+
       // --- Upload ---
       "upload.changePhoto": "تغيير الصورة",
       "upload.uploadPhoto": "تحميل صورة",
@@ -766,7 +818,8 @@ const resources = {
       "toast.historySuccess.cleared": "تم مسح السجل",
       "toast.signInSuccess.title": "نجاح",
       "toast.signInSuccess.desc": "تم تسجيل الدخول بنجاح",
-      "toast.signUpSuccess.desc": "تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.",
+      "toast.signUpSuccess.desc":
+        "تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.",
       "toast.error.title": "خطأ",
       "toast.error.location": "تعذر الحصول على موقعك للترتيب.",
       "toast.error.failedUpdate": "فشل تحديث المفضلة",
@@ -782,7 +835,8 @@ const resources = {
       "toast.deleteError.delete": "فشل حذف القائمة",
       "toast.addListingError.login": "يجب عليك تسجيل الدخول لإرسال قائمة.",
       "toast.addListingError.failed": "فشل إنشاء القائمة",
-      "toast.addListingSuccess.desc": "تم إرسال القائمة بنجاح. وهي الآن قيد المراجعة.",
+      "toast.addListingSuccess.desc":
+        "تم إرسال القائمة بنجاح. وهي الآن قيد المراجعة.",
       "toast.fetchError.listing": "فشل جلب القائمة",
       "toast.fetchError.notFound": "لم يتم العثور على القائمة",
       "toast.update.title.failed": "فشل التحديث",
@@ -797,9 +851,10 @@ const resources = {
       "toast.editSuccess.user": "تم تحديث بيانات المستخدم بنجاح.",
       "toast.addError.user": "فشل في إنشاء المستخدم.",
       "toast.addSuccess.user": "تم إنشاء المستخدم بنجاح.",
-      
+
       // --- Footer ---
-      "footer.slogan": "اكتشف وتواصل مع أماكن رائعة حول العالم. دليلك الشامل للأعمال المحلية.",
+      "footer.slogan":
+        "اكتشف وتواصل مع أماكن رائعة حول العالم. دليلك الشامل للأعمال المحلية.",
       "footer.quickLinksTitle": "روابط سريعة",
       "footer.browseListings": "تصفح القوائم",
       "footer.aboutUs": "من نحن",
@@ -818,20 +873,18 @@ const resources = {
 
       // --- Map ---
       "map.placeholder": "مكان مخصص لتكامل الخريطة",
-      "map.config": "قم بالتهيئة باستخدام مفتاح Mapbox أو Leaflet API الخاص بك"
-    }
+      "map.config": "قم بالتهيئة باستخدام مفتاح Mapbox أو Leaflet API الخاص بك",
+    },
   },
 };
 
-i18n
-  .use(initReactI18next)
-  .init({
-    resources,
-    lng: localStorage.getItem('language') || 'ar', // Default to Arabic
-    fallbackLng: 'en',
-    interpolation: {
-      escapeValue: false,
-    },
-  });
+i18n.use(initReactI18next).init({
+  resources,
+  lng: localStorage.getItem("language") || "ar", // Default to Arabic
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+});
 
 export default i18n;
