@@ -38,7 +38,7 @@ const Home: React.FC = () => {
         setLoadingCities(true);
         setError("");
 
-        const response = await axios.get(`${API_BASE_URL}/places`);
+        const response = await axios.get(`${API_BASE_URL}/api/places`);
         console.log("API Response:", response.data);
 
         // Handle API data extraction
